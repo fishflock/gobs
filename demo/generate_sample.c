@@ -2,8 +2,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 int MAX_LEN = 16;
+char * FILEPATH = "input/";
 char * DEF_FILENAME = "sample";
 int DEF_COUNT = 200;
 int DEF_DIR = 4;
@@ -13,6 +17,7 @@ int main(void) {
 	char filename[MAX_LEN];
 	int count = DEF_COUNT;
 	int dir = DEF_DIR;
+        struct stat st = {0};
 	srand(time(NULL));
 	
 	// Get parameters (or default)
@@ -32,7 +37,10 @@ int main(void) {
 
 	// Open file
 	char * csv_postfix = ".csv";
-	strcpy(buffer, filename);
+        strcpy(buffer, FILEPATH);
+        if (stat(buffer, &st) == -1)
+            mkdir(buffer, 0777);
+        strcat(buffer, filename);
 	strcat(buffer, csv_postfix);
 
 	FILE * output;
@@ -46,7 +54,7 @@ int main(void) {
 		fprintf(output, "%d,\n", v);	
 	}
 
-	if(!(fclose(output))) {
+	if(!(fclose(output) == 0)) {
 		perror("Open file");
 		exit(EXIT_FAILURE);
 	}

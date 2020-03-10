@@ -1,11 +1,17 @@
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 int BUFF_SIZE = 128;
 int DEF_HISTORY_LEN = 5;
 int DEF_DIR = 4;
 char * DEF_INPUT_FILE = "sample";
-char * DEF_OUTPUT_FILE = "compressvector";
+char * DEF_OUTPUT_FILE = "compressvector1";
+char * DEF_INPUT_FILEPATH = "input/";
+char * DEF_OUTPUT_FILEPATH = "output/";
 
 int main() {
 	FILE * input_file;
@@ -14,6 +20,7 @@ int main() {
 	int h_len;
 	int dir = DEF_DIR;
 	char buffer[BUFF_SIZE];
+        struct stat st = {0};
 
 	// Open input file
 	strcpy(filename, DEF_INPUT_FILE);
@@ -21,7 +28,14 @@ int main() {
 	fgets(buffer, BUFF_SIZE, stdin);
 	sscanf(buffer, "%s", filename);
 	strcat(filename, ".csv");
-	input_file = fopen(filename, "r");
+        strcpy(buffer, DEF_INPUT_FILEPATH);
+        if (stat(buffer, &st) == -1)
+            mkdir(buffer, 0777);
+	strcat(buffer, filename);
+	if ((input_file = fopen(buffer, "r")) == NULL) {
+            perror("fopen");
+            exit(EXIT_FAILURE);
+        }
 	
 	// Open output file
 	strcpy(filename, DEF_OUTPUT_FILE);
@@ -29,7 +43,14 @@ int main() {
 	fgets(buffer, BUFF_SIZE, stdin);
 	sscanf(buffer, "%s", filename);
 	strcat(filename, ".txt");
-	output_file = fopen(filename, "w");
+        strcpy(buffer, DEF_OUTPUT_FILEPATH);
+        if (stat(buffer, &st) == -1)
+            mkdir(buffer, 0777);
+	strcat(buffer, filename);
+	if ((output_file = fopen(buffer, "w")) == NULL) {
+            perror("fopen");
+            exit(EXIT_FAILURE);
+        }
 
 	// Set history length
 	h_len = DEF_HISTORY_LEN;
@@ -45,7 +66,7 @@ int main() {
 	int v;
 	
 	for(int k = 0; k < 2 * h_len; k++) {
-	fseek(input_file, k, SEEK_SET);
+	fseek(input_file, k * 3, SEEK_SET);
 	int i = 0;
 	int pf = 0; // past = 0, future = 1
 	while(fread(&v, 1, 1, input_file)) {
