@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "read_c_vectors.h"
+#include "create_c_matrix.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -51,7 +52,7 @@ int main() {
             exit(EXIT_FAILURE);
         }
 
-        int past[4];
+        /*int past[4];
         int future[4];
         while (read_cvec(past, future, input_file) != -1) {
             fprintf(output_file,"(");
@@ -65,8 +66,29 @@ int main() {
                 if (i != 3) fprintf(output_file, " ");
             }
             fprintf(output_file, ")\n");
+        }*/
+
+        int hist = 5;
+        int dir = 4;
+        int size = max_vectors(hist, dir);
+        char labels[size][dir + 1];
+        int matrix[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) matrix[i][j] = 0;
         }
-	
+
+        int x = create_c_matrix_default(size, labels, matrix, input_file);
+
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) printf("%d ", matrix[i][j]);
+            printf("\n");
+        }
+
+        printf("\nlabels:\n");
+        for (int i = 0; i < size; i++) {
+            printf("%d: %s\n", i, labels[i]);
+        }
+
 	fclose(input_file);
 	fclose(output_file);
 }
