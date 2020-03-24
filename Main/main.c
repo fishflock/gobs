@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
 #include "../lib/read_c_vectors.h"
 #include "../lib/create_c_matrix.h"
+#include "../lib/structs.h"
 #include "../lib/create_e_lookup_table.h"
 #include "../lib/create_e_matrix.h"
-#include "../lib/structs.h"
+
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -113,7 +115,7 @@ int main()
     }
 
     // Create the epsilon lookup table
-    struct luRow lookupTable[10];
+    struct luRow lookupTable[100];
 
     // Return # of group leaders ???
     int numGroups = create_e_table(lookupTable, dir, size, matrix, labels, ALPHA);
@@ -130,7 +132,7 @@ int main()
             eMat[i][j] = 0;
     }
     int sizeofLookupTable = sizeof(lookupTable) / sizeof(lookupTable[0]);
-    int done = create_e_matrix(lookupTable, sizeofLookupTable, numGroups, eMat, output_file);
+    int done = create_e_matrix(lookupTable, sizeofLookupTable, numGroups, eMat, input_file, output_file);
 
     fclose(input_file);
     fclose(output_file);
@@ -170,7 +172,7 @@ int print_e_matrix(struct luRow *lookupTable, int size, char labels[size][5])
     for (int i = 0; i < size; i++)
     {
         // if (strcmp((lookupTable[i].epsilon-'0'), "") != 0)
-        if (isdigit(lookupTable[i].epsilon[0]))
+        if (isdigit(lookupTable[i].epsilon[1]))
         {
             printf("%s : ", lookupTable[i].epsilon);
             for (int k = 0; k < 4; k++)
