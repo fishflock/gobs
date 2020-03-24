@@ -85,7 +85,7 @@ int main()
     int hist = 5;
     int dir = 4;
     int size = max_vectors(hist, dir);
-    size = 11;
+    size = 20;
     char labels[size][dir + 1];
     int matrix[size][size];
     for (int i = 0; i < size; i++)
@@ -110,7 +110,7 @@ int main()
         printf("%d: %s\n", i, labels[i]);
     }
 
-        //##################################################################################
+    //##################################################################################
 
     // Create flags array (each flag corresponds to a row)
     int flags[size];
@@ -137,32 +137,42 @@ int main()
     int lastEl = 0;
     int currentLead = 1;
     double total = 0;
-    for (int i = 2; i < size - 1; i++)
+    // Loop through every row in matrix
+    for (int i = 2; i < size; i++)
     {
+        // IF it hasn't been flagged yet, compare it to all the others
         if (flags[i] == 0)
         {
-            total = 0;
-            find_groups(matrix[currentLead], matrix[i], size, &total);
-            printf("Total: %f\n", total);
 
-            if (total > ALPHA)
+            for (int i = 2; i < size; i++)
             {
-                printf("Adding label %s to the epsilon table!", labels[i]);
-                // Flag this row!
-                flags[i] = 1;
-                // Add the LEADER'S label to the epsilon table
-                for (int j = 0; j < dir; j++)
+                if (flags[i] == 0)
                 {
-                    testTable[0].epsilon[j + 1] = labels[i][j + 1];
+                    total = 0;
+                    find_groups(matrix[currentLead], matrix[i], size, &total);
+                    //printf("Total: %f\n", total);
+
+                    if (total > ALPHA)
+                    {
+                        printf("Adding label %s to the epsilon table!\n", labels[currentLead]);
+                        // Flag this row!
+                        flags[i] = 1;
+                        // Add the LEADER'S label to the epsilon table
+                        for (int j = 0; j < dir; j++)
+                        {
+                            testTable[0].epsilon[j + 1] = labels[currentLead][j + 1];
+                        }
+                        // Add the follower's vector to the epsilon table
+                        for (int j = 0; j < dir; j++)
+                        {
+                            testTable[0].vector[j] = labels[i + 1][j];
+                        }
+                        lastEl++;
+                    }
                 }
-                // Add the follower's vector to the epsilon table
-                for (int j = 0; j < dir; j++)
-                {
-                    testTable[0].vector[j] = labels[i + 1][j];
-                }
-                lastEl++;
             }
         }
+        currentLead++;
     }
 
     fclose(input_file);
@@ -174,7 +184,6 @@ int find_groups(int *row1, int *row2, int size, double *total)
     //---------- DONT FORGET TO UN-HARDCODE SIZE ----------------------
     size = 7;
 
-    printf("------------- Find Groups Computations -------------- \n");
     int sum1 = 0;
     int sum2 = 0;
 
@@ -183,8 +192,8 @@ int find_groups(int *row1, int *row2, int size, double *total)
         sum1 += row1[i];
         sum2 += row2[i];
     }
-    printf("sum1: %d\n", sum1);
-    printf("sum2: %d\n", sum2);
+    // printf("sum1: %d\n", sum1);
+    // printf("sum2: %d\n", sum2);
 
     double k1 = 0;
     if (sum1 != 0)
@@ -196,8 +205,8 @@ int find_groups(int *row1, int *row2, int size, double *total)
     {
         k2 = sqrt(sum1 / sum2);
     }
-    printf("k1: %f\n", k1);
-    printf("k2: %f\n", k2);
+    // printf("k1: %f\n", k1);
+    // printf("k2: %f\n", k2);
 
     for (int k = 0; k < size; k++)
     {
