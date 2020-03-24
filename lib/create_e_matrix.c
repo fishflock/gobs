@@ -3,22 +3,31 @@
 #include <stdlib.h>
 #include "read_c_vectors.h"
 #include "create_e_matrix.h"
-#include "structs.h"
 
-int BUFF_SIZE = 128;
-char *DEF_OUTPUT_FILE = "output";
-int debug = 0;
+//int BUFF_SIZE = 128;
+//char *DEF_OUTPUT_FILE = "output";
+//int debug = 0;
 
-int create_e_matrix(struct luRow *lookupTable, int sizeofLookupTable, int numRows, int eMat[numRows][numRows], FILE *output_file)
+int create_e_matrix(struct luRow *lookupTable, int sizeofLookupTable, int numRows, int eMat[numRows][numRows], FILE *input_file, FILE *output_file)
 {
-    char *pastE;
-    char *futureE;
-    int pastEPos, futureEPos = -1;
-    int dir = 4;
+    fpos_t pos;
+    // Restore to old position and read data
+    if (fsetpos(input_file, &pos) != 0)
+    {
+        perror("fsetpos error");
+        return -1;
+    }
 
+    printf("\n\nsize of e matrix: %d\n", numRows);
+    printf("sizeofLookupTable: %d\n\n", sizeofLookupTable);
+
+    int dir = 4;
     int past[4];
     int future[4];
-    while (read_cvec(past, future, output_file) != -1)
+    int pastEPos = -1;
+    int futureEPos = -1;
+
+    while (read_cvec(past, future, input_file) != -1)
     {
         // For each entry in the lookup table
         for (int j = 0; j < sizeofLookupTable; j++)
@@ -72,14 +81,33 @@ int create_e_matrix(struct luRow *lookupTable, int sizeofLookupTable, int numRow
         }
         else
         {
-            printf("Could not find pos.");
+            printf("Could not find a position in the matrix to match: \n");
+            printf("past vector: ");
+            for (int i = 0; i < 4; i++)
+            {
+                printf("%d", past[i]);
+                if (i == 3)
+                {
+                    printf("\n");
+                }
+            }
+            printf("future vector: ");
+            for (int i = 0; i < 4; i++)
+            {
+                printf("%d", future[i]);
+                if (i == 3)
+                {
+                    printf("\n");
+                }
+            }
         }
     }
 
     // Write eMat to output file
     // Open output file
-    char filename[BUFF_SIZE];
-    strcpy(filename, DEF_OUTPUT_FILE);
+    int temp_buff_size = 128;
+    char filename[temp_buff_size];
+    strcpy(filename, "output");
     strcat(filename, ".txt");
     output_file = fopen(filename, "w");
 
@@ -87,21 +115,21 @@ int create_e_matrix(struct luRow *lookupTable, int sizeofLookupTable, int numRow
     int row, col, top;
     fprintf(output_file, "Epsilon matrix:\n");
     fprintf(output_file, "      ");
-    for (top = 0; top < sizeofLookupTable; top++)
+    for (top = 0; top < numRows; top++)
     {
         fprintf(output_file, "%s ", lookupTable[top].epsilon);
-        if (top == sizeofLookupTable - 1)
+        if (top == numRows - 1)
         {
             fprintf(output_file, "\n");
         }
     }
-    for (row = 0; row < sizeofLookupTable; row++)
+    for (row = 0; row < numRows; row++)
     {
         fprintf(output_file, "%s ", lookupTable[row].epsilon);
-        for (col = 0; col < sizeofLookupTable; col++)
+        for (col = 0; col < numRows; col++)
         {
             fprintf(output_file, "  %d   ", eMat[row][col]);
-            if (col == sizeofLookupTable - 1)
+            if (col == numRows - 1)
             {
                 fprintf(output_file, "\n");
             }

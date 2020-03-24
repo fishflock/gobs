@@ -3,7 +3,6 @@
 #include <string.h>
 #include <math.h>
 #include "create_e_lookup_table.h"
-#include "structs.h"
 
 int create_e_table(struct luRow *lookupTable, int dir, int size, int matrix[size][size], char labels[size][dir + 1], double ALPHA)
 {
@@ -30,7 +29,7 @@ int create_e_table(struct luRow *lookupTable, int dir, int size, int matrix[size
 
 int fill_e_table(int *flags, struct luRow *lookupTable, int dir, int size, int matrix[size][size], char labels[size][dir + 1], double ALPHA)
 {
-    int lastEl = 0;
+    int lastEl = 1;
     int currentLead = 1;
     double total = 0;
     // Loop through every row in matrix
