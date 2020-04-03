@@ -93,8 +93,8 @@ int main()
     // TODO: Modify this to produce two sizes:
     //      1 for max vecs (including duplicates)
     //      1 for actual # vecs
-    int size = max_vectors(hist, dir);
-    size = 20;
+    int size = max_vectors(hist, dir, input_file);
+    printf("\n\n-MAX VECS-----------%d-------------\n", size);
 
     // Create list of labels and initialize matrix to all zeros
     char labels[size][dir + 1];
@@ -104,6 +104,8 @@ int main()
         for (int j = 0; j < size; j++)
             matrix[i][j] = 0;
     }
+
+    int numberOfUniqueVecs = 0;
 
     // Create c matrix
     int createCMat = create_c_matrix_default(size, labels, matrix, input_file);
@@ -171,7 +173,6 @@ int print_e_matrix(struct luRow *lookupTable, int size, char labels[size][5])
     printf("\n\nEpsilon Lookup Table: \n");
     for (int i = 0; i < size; i++)
     {
-        // if (strcmp((lookupTable[i].epsilon-'0'), "") != 0)
         if (isdigit(lookupTable[i].epsilon[1]))
         {
             printf("%s : ", lookupTable[i].epsilon);
