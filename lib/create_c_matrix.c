@@ -68,7 +68,7 @@ int create_c_matrix(int len, int dir, int size,
     return 1;
 }
 
-int create_c_matrix_default(int size, char labels[size][4],
+int create_c_matrix_default(int size, char labels[size][5],
                             int matrix[size][size], FILE *file)
 {
     create_c_matrix(5, 4, size, labels, matrix, file);
@@ -119,6 +119,7 @@ int max_vectors(int hist, int dir, FILE *file)
 
     while (read_cvec(past, future, file) != -1)
     {
+
         char past_label[dir + 1];
         for (int j = 0; j < dir; j++)
             past_label[j] = past[j] + '0';
@@ -160,7 +161,11 @@ int max_vectors(int hist, int dir, FILE *file)
         }
     }
 
+    printf("\n\n\n");
+    printf("------- LAST LABEL VAL:    %d", last_label_pos + 1);
+    printf("\n\n\n");
+
     fseek(file, 0, SEEK_SET);
 
-    return last_label_pos;
+    return last_label_pos + 1;
 }

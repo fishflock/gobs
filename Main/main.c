@@ -20,11 +20,11 @@ char *DEF_INPUT_FILEPATH = "input/";
 char *DEF_OUTPUT_FILEPATH = "output/";
 double ALPHA = 0.0;
 
-int debug = 1;
+int debug = 0;
 
 int print_c_matrix(int size, char labels[size][5], int matrix[size][size]);
 int print_labels(int size, char labels[size][5]);
-int print_e_matrix(struct luRow *lookupTable, int size, char labels[size][5]);
+int print_e_lookup(struct luRow *lookupTable, int size, char labels[size][5]);
 
 int main()
 {
@@ -36,9 +36,10 @@ int main()
 
     // Open input file
     strcpy(filename, DEF_INPUT_FILE);
-    //printf("open file(%s)=", DEF_INPUT_FILE);
-    //fgets(buffer, BUFF_SIZE, stdin);
-    //sscanf(buffer, "%s", filename);
+    printf("***Note: Input file must be CSV.\n");
+    printf("       Enter name of input file WITHOUT the .csv extension = ");
+    fgets(buffer, BUFF_SIZE, stdin);
+    sscanf(buffer, "%s", filename);
     strcat(filename, ".csv");
     strcpy(buffer, DEF_INPUT_FILEPATH);
     if (stat(buffer, &st) == -1)
@@ -94,7 +95,6 @@ int main()
     //      1 for max vecs (including duplicates)
     //      1 for actual # vecs
     int size = max_vectors(hist, dir, input_file);
-    printf("\n\n-MAX VECS-----------%d-------------\n", size);
 
     // Create list of labels and initialize matrix to all zeros
     char labels[size][dir + 1];
@@ -124,7 +124,7 @@ int main()
 
     if (debug)
     {
-        int printEMat = print_e_matrix(lookupTable, size, labels);
+        int printEMat = print_e_lookup(lookupTable, size, labels);
     }
 
     int eMat[numGroups][numGroups];
@@ -147,6 +147,7 @@ int main()
 
 int print_c_matrix(int size, char labels[size][5], int matrix[size][size])
 {
+
     printf("\n\nCo-occurrence Matrix: \n");
     for (int i = 1; i < size; i++)
     {
@@ -168,7 +169,7 @@ int print_labels(int size, char labels[size][5])
     return 1;
 }
 
-int print_e_matrix(struct luRow *lookupTable, int size, char labels[size][5])
+int print_e_lookup(struct luRow *lookupTable, int size, char labels[size][5])
 {
     printf("\n\nEpsilon Lookup Table: \n");
     for (int i = 0; i < size; i++)
