@@ -4,20 +4,8 @@
 #include "read_c_vectors.h"
 #include "create_e_matrix.h"
 
-//int BUFF_SIZE = 128;
-//char *DEF_OUTPUT_FILE = "output";
-//int debug = 0;
-
 int create_e_matrix(struct luRow *lookupTable, int sizeofLookupTable, int numRows, int eMat[numRows][numRows], FILE *input_file, FILE *output_file)
 {
-    fpos_t pos;
-    // Restore to old position and read data
-    if (fsetpos(input_file, &pos) != 0)
-    {
-        perror("fsetpos error");
-        return -1;
-    }
-
     printf("\n\nsize of e matrix: %d\n", numRows);
     printf("sizeofLookupTable: %d\n\n", sizeofLookupTable);
 
@@ -29,49 +17,48 @@ int create_e_matrix(struct luRow *lookupTable, int sizeofLookupTable, int numRow
 
     while (read_cvec(past, future, input_file) != -1)
     {
-        // For each entry in the lookup table
-        for (int j = 0; j < sizeofLookupTable; j++)
-        {
-            // For each coordinate in a single compressed vector (4)
-            for (int k = 0; k < 4; k++)
-            {
-                // If the coordinate of the current vector matches
-                //      that of the current lookup table entry, --continue--
-                // Otherwise, move on to the next entry in the lookup table
-                if (past[k] == lookupTable[j].vector[k])
-                {
-                    if (k == 3)
-                    {
-                        pastEPos = get_epsilon_pos(lookupTable[j].epsilon, lookupTable, sizeofLookupTable);
-                    }
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
+        char past_label[dir + 1];
+        for (int j = 0; j < dir; j++)
+            past_label[j] = past[j] + '0';
+        past_label[dir] = '\0';
+        //printf("\n%s : ", past_label);
 
         // For each entry in the lookup table
         for (int j = 0; j < sizeofLookupTable; j++)
         {
-            // For each coordinate in a single compressed vector (4)
-            for (int k = 0; k < 4; k++)
+            char currPastVec[dir + 1];
+            for (int i = 0; i < dir; i++)
+                currPastVec[i] = lookupTable[j].vector[i] + '0';
+            currPastVec[dir] = '\0';
+            //printf("%s, ", currPastVec);
+
+            if (strcmp(past_label, currPastVec) == 0)
             {
-                // If the coordinate of the current vector matches
-                //      that of the current lookup table entry, --continue--
-                // Otherwise, move on to the next entry in the lookup table
-                if (future[k] == lookupTable[j].vector[k])
-                {
-                    if (k == 3)
-                    {
-                        futureEPos = get_epsilon_pos(lookupTable[j].epsilon, lookupTable, sizeofLookupTable);
-                    }
-                }
-                else
-                {
-                    break;
-                }
+                pastEPos = get_epsilon_pos(lookupTable[j].epsilon, lookupTable, sizeofLookupTable);
+                break;
+            }
+        }
+
+        char future_label[dir + 1];
+        for (int j = 0; j < dir; j++)
+            future_label[j] = future[j] + '0';
+        future_label[dir] = '\0';
+        //printf("\n%s : ", future_label);
+
+        // For each entry in the lookup table
+        for (int j = 0; j < sizeofLookupTable; j++)
+        {
+            char currFutureVec[dir + 1];
+            for (int i = 0; i < dir; i++)
+                currFutureVec[i] = lookupTable[j].vector[i] + '0';
+            currFutureVec[dir] = '\0';
+            //printf("%s, ", currFutureVec);
+
+            if (strcmp(future_label, currFutureVec) == 0)
+            {
+                futureEPos = get_epsilon_pos(lookupTable[j].epsilon, lookupTable, sizeofLookupTable);
+                ;
+                break;
             }
         }
 

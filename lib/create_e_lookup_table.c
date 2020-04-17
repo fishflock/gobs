@@ -4,13 +4,13 @@
 #include <math.h>
 #include "create_e_lookup_table.h"
 
-int create_e_table(struct luRow *lookupTable, int dir, int size, int matrix[size][size], char labels[size][dir + 1], double ALPHA)
+int create_e_table(struct luRow *lookupTable, int dir, int realSize, int matrix[816][816], char labels[816][dir + 1], double ALPHA)
 {
     // Create flags array (each flag corresponds to a row)
-    int flags[size];
+    int flags[realSize];
     flags[0] = 1;
     flags[1] = 1;
-    for (int i = 2; i < size; i++)
+    for (int i = 2; i < realSize; i++)
     {
         flags[i] = 0;
     }
@@ -23,29 +23,29 @@ int create_e_table(struct luRow *lookupTable, int dir, int size, int matrix[size
     {
         lookupTable[0].vector[j] = labels[1][j] - '0';
     }
-    int fillTab = fill_e_table(flags, lookupTable, dir, size, matrix, labels, ALPHA);
+    int fillTab = fill_e_table(flags, lookupTable, dir, realSize, matrix, labels, ALPHA);
     return 1;
 }
 
-int fill_e_table(int *flags, struct luRow *lookupTable, int dir, int size, int matrix[size][size], char labels[size][dir + 1], double ALPHA)
+int fill_e_table(int *flags, struct luRow *lookupTable, int dir, int realSize, int matrix[816][816], char labels[816][dir + 1], double ALPHA)
 {
     int lastEl = 1;
     int currentLead = 1;
     double total = 0;
     // Loop through every row in matrix
-    for (int h = 2; h < size; h++)
+    for (int h = 2; h < realSize; h++)
     {
         //printf("...labels[currentLead]: %s\n", labels[currentLead]);
         // IF it hasn't been flagged yet, compare it to all the others
         if (flags[h] == 0)
         {
 
-            for (int i = 2; i < size; i++)
+            for (int i = 2; i < realSize; i++)
             {
                 if (flags[i] == 0)
                 {
                     total = 0;
-                    compare_rows(matrix[currentLead], matrix[i], size, &total);
+                    compare_rows(matrix[currentLead], matrix[i], realSize, &total);
                     //printf("Total: %f\n", total);
 
                     if (total > ALPHA)
@@ -70,12 +70,12 @@ int fill_e_table(int *flags, struct luRow *lookupTable, int dir, int size, int m
     return lastEl + 1;
 }
 
-int compare_rows(int *row1, int *row2, int size, double *total)
+int compare_rows(int *row1, int *row2, int realSize, double *total)
 {
     int sum1 = 0;
     int sum2 = 0;
 
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < realSize; i++)
     {
         sum1 += row1[i];
         sum2 += row2[i];
@@ -96,7 +96,7 @@ int compare_rows(int *row1, int *row2, int size, double *total)
     // printf("k1: %f\n", k1);
     // printf("k2: %f\n", k2);
 
-    for (int k = 0; k < size; k++)
+    for (int k = 0; k < realSize; k++)
     {
         double denominator = row1[k] + row2[k];
         if (denominator != 0)

@@ -14,6 +14,7 @@
 #include <ctype.h>
 
 int BUFF_SIZE = 128;
+int MAX_SIZE = 816;
 char *DEF_INPUT_FILE = "sample";
 char *DEF_OUTPUT_FILE = "compressvector2";
 char *DEF_INPUT_FILEPATH = "input/";
@@ -22,9 +23,9 @@ double ALPHA = 0.0;
 
 int debug = 0;
 
-int print_c_matrix(int size, char labels[size][5], int matrix[size][size]);
-int print_labels(int size, char labels[size][5]);
-int print_e_lookup(struct luRow *lookupTable, int size, char labels[size][5]);
+int print_c_matrix(int realSize, char labels[MAX_SIZE][5], int matrix[MAX_SIZE][MAX_SIZE]);
+int print_labels(int realSize, char labels[MAX_SIZE][5]);
+int print_e_lookup(struct luRow *lookupTable, int realSize, char labels[MAX_SIZE][5]);
 
 int main()
 {
@@ -54,83 +55,45 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    // // Open output file
-    // strcpy(filename, DEF_OUTPUT_FILE);
-    // //printf("open file(%s)=", DEF_OUTPUT_FILE);
-    // //fgets(buffer, BUFF_SIZE, stdin);
-    // //sscanf(buffer, "%s", filename);
-    // strcat(filename, ".txt");
-    // strcpy(buffer, DEF_OUTPUT_FILEPATH);
-    // if (stat(buffer, &st) == -1)
-    //     mkdir(buffer, 0777);
-    // strcat(buffer, filename);
-    // if ((output_file = fopen(buffer, "w")) == NULL)
-    // {
-    //     perror("fopen");
-    //     exit(EXIT_FAILURE);
-    // }
-
-    /*int past[4];
-        int future[4];
-        while (read_cvec(past, future, input_file) != -1) {
-            fprintf(output_file,"(");
-            for (int i = 0; i < 4; i++) {
-                fprintf(output_file, "%d", past[i]);
-                if (i != 3) fprintf(output_file, " ");
-            }
-            fprintf(output_file, ") : (");
-            for (int i = 0; i < 4; i++) {
-                fprintf(output_file, "%d", future[i]);
-                if (i != 3) fprintf(output_file, " ");
-            }
-            fprintf(output_file, ")\n");
-        }*/
-
     // Set past/future raw vector length to 5
     int hist = 5;
     // Set number of directions to 4 (compressed vec length=4)
     int dir = 4;
 
-    // TODO: Modify this to produce two sizes:
-    //      1 for max vecs (including duplicates)
-    //      1 for actual # vecs
-    int size = max_vectors(hist, dir, input_file);
-
     // Create list of labels and initialize matrix to all zeros
-    char labels[size][dir + 1];
-    int matrix[size][size];
-    for (int i = 0; i < size; i++)
+    char labels[MAX_SIZE][dir + 1];
+    int matrix[MAX_SIZE][MAX_SIZE];
+    for (int i = 0; i < MAX_SIZE; i++)
     {
-        for (int j = 0; j < size; j++)
+        for (int j = 0; j < MAX_SIZE; j++)
             matrix[i][j] = 0;
     }
 
-    int numberOfUniqueVecs = 0;
-
     // Create c matrix
-    int createCMat = create_c_matrix_default(size, labels, matrix, input_file);
+    int realSize = create_c_matrix(hist, dir, labels, matrix, input_file);
+    printf("real size: %d\n", realSize);
 
     if (debug)
     {
-        int printCMat = print_c_matrix(size, labels, matrix);
-        int printLabels = print_labels(size, labels);
+        int printCMat = print_c_matrix(realSize, labels, matrix);
+        int printLabels = print_labels(realSize, labels);
     }
 
     // Create the epsilon lookup table
     struct luRow lookupTable[100];
 
     // Return # of group leaders ???
-    int numGroups = create_e_table(lookupTable, dir, size, matrix, labels, ALPHA);
+    int numGroups = create_e_table(lookupTable, dir, realSize, matrix, labels, ALPHA);
 
     if (debug)
     {
-        int printEMat = print_e_lookup(lookupTable, size, labels);
+        int printEMat = print_e_lookup(lookupTable, realSize, labels);
     }
 
     int eMat[numGroups][numGroups];
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < realSize; i++)
     {
-        for (int j = 0; j < size; j++)
+        for (int j = 0; j < realSize; j++)
             eMat[i][j] = 0;
     }
     int sizeofLookupTable = sizeof(lookupTable) / sizeof(lookupTable[0]);
@@ -145,34 +108,34 @@ int main()
 //##################################################################################
 // HELPER METHODS FOR PRINTING TO TERMINAL
 
-int print_c_matrix(int size, char labels[size][5], int matrix[size][size])
+int print_c_matrix(int realSize, char labels[MAX_SIZE][5], int matrix[MAX_SIZE][MAX_SIZE])
 {
 
     printf("\n\nCo-occurrence Matrix: \n");
-    for (int i = 1; i < size; i++)
+    for (int i = 1; i < realSize; i++)
     {
         printf("%s ", labels[i]);
-        for (int j = 1; j < size; j++)
+        for (int j = 1; j < realSize; j++)
             printf("%d ", matrix[i][j]);
         printf("\n");
     }
     return 1;
 }
 
-int print_labels(int size, char labels[size][5])
+int print_labels(int realSize, char labels[MAX_SIZE][5])
 {
     printf("\n\nLabels:\n");
-    for (int i = 1; i < size; i++)
+    for (int i = 1; i < realSize; i++)
     {
         printf("%d: %s\n", i, labels[i]);
     }
     return 1;
 }
 
-int print_e_lookup(struct luRow *lookupTable, int size, char labels[size][5])
+int print_e_lookup(struct luRow *lookupTable, int realSize, char labels[MAX_SIZE][5])
 {
     printf("\n\nEpsilon Lookup Table: \n");
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < realSize; i++)
     {
         if (isdigit(lookupTable[i].epsilon[1]))
         {
