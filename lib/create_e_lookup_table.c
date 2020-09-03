@@ -4,8 +4,10 @@
 #include <math.h>
 #include "create_e_lookup_table.h"
 
-int create_e_table(struct luRow *lookupTable, int dir, int realSize, int matrix[816][816], char labels[816][dir + 1], double ALPHA)
+int create_e_table(struct luRow *lookupTable, int dir, int realSize, int ***ptrToMatrix, char ***ptrToLabels, double ALPHA)
 {
+    char **labels = *ptrToLabels;
+    int **matrix = *ptrToMatrix;
     // Create flags array (each flag corresponds to a row)
     int flags[realSize];
     flags[0] = 1;
@@ -23,12 +25,14 @@ int create_e_table(struct luRow *lookupTable, int dir, int realSize, int matrix[
     {
         lookupTable[0].vector[j] = labels[1][j] - '0';
     }
-    int fillTab = fill_e_table(flags, lookupTable, dir, realSize, matrix, labels, ALPHA);
+    int fillTab = fill_e_table(flags, lookupTable, dir, realSize, &matrix, &labels, ALPHA);
     return 1;
 }
 
-int fill_e_table(int *flags, struct luRow *lookupTable, int dir, int realSize, int matrix[816][816], char labels[816][dir + 1], double ALPHA)
+int fill_e_table(int *flags, struct luRow *lookupTable, int dir, int realSize, int ***ptrToMatrix, char ***ptrToLabels, double ALPHA)
 {
+    char **labels = *ptrToLabels;
+    int **matrix = *ptrToMatrix;
     int lastEl = 1;
     int currentLead = 1;
     double total = 0;

@@ -26,48 +26,63 @@
  *
  */
 
-int read_c_vectors(int * past, int * future, 
-                    int len, int dir, FILE * file) {
+int read_c_vectors(int *past, int *future,
+                   int len, int dir, FILE *file)
+{
     fpos_t pos;
-    if (fgetpos(file, &pos) == -1) return -1;
+    if (fgetpos(file, &pos) == -1)
+        return -1;
 
+    int i;
     // Initialize vectors to all 0s
-    for (int i = 0; i < dir; i++) {
+    for (i = 0; i < dir; i++)
+    {
         past[i] = 0;
         future[i] = 0;
     }
 
     int val;
     // Get past compression vector
-    for (int i = 0; i < len; i++) {
-        if (fscanf(file, " %d", &val) == EOF) return -1;
-        if (val > dir) return -1;
+    for (i = 0; i < len; i++)
+    {
+        if (fscanf(file, " %d", &val) == EOF)
+            return -1;
+        if (val > dir)
+            return -1;
         past[val - 1] += 1;
-        if (fscanf(file, " ,") == EOF) return -1;
+        if (fscanf(file, " ,") == EOF)
+            return -1;
     }
 
     // Get future compression vector
-    for (int i = 0; i < len; i++) {
-        if (fscanf(file, " %d", &val) == EOF) return -1;
-        if (val > dir) return -1;
+    for (i = 0; i < len; i++)
+    {
+        if (fscanf(file, " %d", &val) == EOF)
+            return -1;
+        if (val > dir)
+            return -1;
         future[val - 1] += 1;
-        if (fscanf(file, " ,") == EOF) {
+        if (fscanf(file, " ,") == EOF)
+        {
             // e.g. end of file doesn't require comma
-            if (i != len - 1) return -1;
+            if (i != len - 1)
+                return -1;
         }
     }
-    
+
     // Move forward
-    if (fsetpos(file, &pos) == -1) return -1;
-    if (fscanf(file, " %*d ,") == -1) return -1;
-    
+    if (fsetpos(file, &pos) == -1)
+        return -1;
+    if (fscanf(file, " %*d ,") == -1)
+        return -1;
+
     return 1;
 }
 
 // Default values for read_c_vectors
-int read_cvec(int * past, int * future, FILE * file) {
+int read_cvec(int *past, int *future, FILE *file)
+{
     int len = DEF_HIST_LEN;
     int dir = DEF_DIR_NO;
     return read_c_vectors(past, future, len, dir, file);
 }
-

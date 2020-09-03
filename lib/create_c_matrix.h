@@ -2,8 +2,8 @@
 #define CREATE_C_MATRIX_H
 #include <stdio.h>
 
-int create_c_matrix(int len, int dir,
-                    char labels[816][dir + 1],
-                    int matrix[816][816], FILE *file);
+int create_c_matrix(int dir,
+                    char ***ptrToLabels,
+                    int ***ptrToMatrix, FILE *file);
 
 #endif

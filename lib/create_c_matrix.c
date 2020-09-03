@@ -6,25 +6,23 @@
 
 // Note: expects 2D array for both labels and matrix.
 // Must be uninitialized
-int create_c_matrix(int len, int dir,
-                    char labels[816][dir + 1],
-                    int matrix[816][816],
+int create_c_matrix(int dir,
+                    char ***ptrToLabels,
+                    int ***ptrToMatrix,
                     FILE *file)
 {
-
+    char **labels = *ptrToLabels;
+    int **matrix = *ptrToMatrix;
     int past[dir];
     int future[dir];
 
     int last_label_pos = 0;
-    for (int j = 0; j < dir; j++)
-        labels[0][j] = '0';
-    labels[0][dir] = '\0';
-
+    int i;
     while (read_cvec(past, future, file) != -1)
     {
         char past_label[dir + 1];
-        for (int j = 0; j < dir; j++)
-            past_label[j] = past[j] + '0';
+        for (i = 0; i < dir; i++)
+            past_label[i] = past[i] + '0';
         past_label[dir] = '\0';
         //printf("%s : ", past_label);
 

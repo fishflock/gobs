@@ -4,8 +4,9 @@
 #include "read_c_vectors.h"
 #include "create_e_matrix.h"
 
-int create_e_matrix(struct luRow *lookupTable, int sizeofLookupTable, int numRows, int eMat[numRows][numRows], FILE *input_file, FILE *output_file)
+int create_e_matrix(struct luRow *lookupTable, int sizeofLookupTable, int numRows, int ***ptrToEMat, FILE *input_file, FILE *output_file)
 {
+    int **eMat = *ptrToEMat;
     printf("\n\nsize of e matrix: %d\n", numRows);
     printf("sizeofLookupTable: %d\n\n", sizeofLookupTable);
 
