@@ -4,10 +4,12 @@
 #include <math.h>
 #include "create_e_lookup_table.h"
 
-int create_e_table(struct luRow *lookupTable, int dir, int realSize, int ***ptrToMatrix, char ***ptrToLabels, double ALPHA)
+int create_e_table(struct luRow **ptrToLookupTable, int dir, int realSize, int ***ptrToMatrix, char ***ptrToLabels, double ALPHA)
 {
+    struct luRow *lookupTable = *ptrToLookupTable;
     char **labels = *ptrToLabels;
     int **matrix = *ptrToMatrix;
+
     // Create flags array (each flag corresponds to a row)
     int flags[realSize];
     flags[0] = 1;
@@ -25,26 +27,28 @@ int create_e_table(struct luRow *lookupTable, int dir, int realSize, int ***ptrT
     {
         lookupTable[0].vector[j] = labels[1][j] - '0';
     }
-    int fillTab = fill_e_table(flags, lookupTable, dir, realSize, &matrix, &labels, ALPHA);
+    int fillTab = fill_e_table(flags, &lookupTable, dir, realSize, &matrix, &labels, ALPHA);
     return 1;
 }
 
-int fill_e_table(int *flags, struct luRow *lookupTable, int dir, int realSize, int ***ptrToMatrix, char ***ptrToLabels, double ALPHA)
+int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realSize, int ***ptrToMatrix, char ***ptrToLabels, double ALPHA)
 {
+    struct luRow *lookupTable = *ptrToLookupTable;
     char **labels = *ptrToLabels;
     int **matrix = *ptrToMatrix;
+
     int lastEl = 1;
     int currentLead = 1;
     double total = 0;
+    int i, h;
     // Loop through every row in matrix
-    for (int h = 2; h < realSize; h++)
+    for (h = 2; h < realSize; h++)
     {
         //printf("...labels[currentLead]: %s\n", labels[currentLead]);
         // IF it hasn't been flagged yet, compare it to all the others
         if (flags[h] == 0)
         {
-
-            for (int i = 2; i < realSize; i++)
+            for (i = 2; i < realSize; i++)
             {
                 if (flags[i] == 0)
                 {

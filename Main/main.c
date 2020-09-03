@@ -25,7 +25,7 @@ int debug = 1;
 
 int print_c_matrix(int realSize, char ***ptrToLabels, int ***ptrToMatrix);
 int print_labels(int realSize, char ***ptrToLabels);
-int print_e_lookup(struct luRow *lookupTable, int realSize, char ***ptrToLabels);
+int print_e_lookup(struct luRow **ptrToLookupTable, int realSize, char ***ptrToLabels);
 
 int main()
 {
@@ -97,14 +97,15 @@ int main()
     }
 
     // Create the epsilon lookup table
-    struct luRow lookupTable[100];
+    //struct luRow lookupTable[100];
+    struct luRow *lookupTable = (struct luRow *)malloc(sizeof(struct luRow) * MAX_SIZE);
 
     // Return # of group leaders ???
-    int numGroups = create_e_table(lookupTable, dir, realSize, &matrix, &labels, ALPHA);
+    int numGroups = create_e_table(&lookupTable, dir, realSize, &matrix, &labels, ALPHA);
 
     if (debug)
     {
-        int printEMat = print_e_lookup(lookupTable, realSize, &labels);
+        int printEMat = print_e_lookup(&lookupTable, realSize, &labels);
     }
 
     // INITIALIZE MATRIX AS A 2D INT ARRAY WITH DIMENSIONS: NUMGROUPS*NUMGROUPS
@@ -121,7 +122,7 @@ int main()
     }
 
     int sizeofLookupTable = sizeof(lookupTable) / sizeof(lookupTable[0]);
-    int done = create_e_matrix(lookupTable, sizeofLookupTable, numGroups, &eMat, input_file, output_file);
+    int done = create_e_matrix(&lookupTable, 20, numGroups, &eMat, input_file, output_file);
 
     fclose(input_file);
     fclose(output_file);
@@ -189,8 +190,9 @@ int print_labels(int realSize, char ***ptrToLabels)
     return 1;
 }
 
-int print_e_lookup(struct luRow *lookupTable, int realSize, char ***ptrToLabels)
+int print_e_lookup(struct luRow **ptrToLookupTable, int realSize, char ***ptrToLabels)
 {
+    struct luRow *lookupTable = *ptrToLookupTable;
     char **labels = *ptrToLabels;
     printf("\n\nEpsilon Lookup Table: \n");
     for (int i = 0; i < realSize; i++)

@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include "structs.h"
 
-int create_e_table(struct luRow *lookupTable, int dir, int realSize, int ***ptrToMatrix, char ***ptrToLabels, double ALPHA);
-int fill_e_table(int *flags, struct luRow *lookupTable, int dir, int realSize, int ***ptrToMatrix, char ***ptrToLabels, double ALPHA);
+int create_e_table(struct luRow **lookupTable, int dir, int realSize, int ***ptrToMatrix, char ***ptrToLabels, double ALPHA);
+int fill_e_table(int *flags, struct luRow **lookupTable, int dir, int realSize, int ***ptrToMatrix, char ***ptrToLabels, double ALPHA);
 int compare_rows(int *row1, int *row2, int realSize, double *total);
 
 #endif

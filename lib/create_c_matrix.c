@@ -13,29 +13,17 @@ int create_c_matrix(int dir,
 {
     char **labels = *ptrToLabels;
     int **matrix = *ptrToMatrix;
-    int past[dir];
-    int future[dir];
+    char past[dir + 1];
+    char future[dir + 1];
 
     int last_label_pos = 0;
     int i;
     while (read_cvec(past, future, file) != -1)
     {
-        char past_label[dir + 1];
-        for (i = 0; i < dir; i++)
-            past_label[i] = past[i] + '0';
-        past_label[dir] = '\0';
-        //printf("%s : ", past_label);
-
-        char future_label[dir + 1];
-        for (int j = 0; j < dir; j++)
-            future_label[j] = future[j] + '0';
-        future_label[dir] = '\0';
-        //printf("%s\n", future_label);
-
         int past_pos = -1;
         for (int i = 0; i < last_label_pos + 1; i++)
         {
-            if (strcmp(past_label, labels[i]) == 0)
+            if (strcmp(past, labels[i]) == 0)
             {
                 //printf("Found a PAST match\n");
                 past_pos = i;
@@ -45,14 +33,14 @@ int create_c_matrix(int dir,
         {
             //printf("Couldn't find a PAST match. Adding a new label!\n");
             last_label_pos++;
-            strcpy(labels[last_label_pos], past_label);
+            strcpy(labels[last_label_pos], past);
             past_pos = last_label_pos;
         }
 
         int future_pos = -1;
         for (int i = 0; i < last_label_pos + 1; i++)
         {
-            if (strcmp(future_label, labels[i]) == 0)
+            if (strcmp(future, labels[i]) == 0)
             {
                 //printf("Found a FUTURE match\n");
                 future_pos = i;
@@ -62,7 +50,7 @@ int create_c_matrix(int dir,
         {
             //printf("Couldn't find a FUTURE match. Adding a new label!\n");
             last_label_pos++;
-            strcpy(labels[last_label_pos], future_label);
+            strcpy(labels[last_label_pos], future);
             future_pos = last_label_pos;
         }
 
