@@ -1,6 +1,6 @@
 # Geometry of Behavioral Spaces Framework
 
-### NetLogo
+### NetLogo Data Generation
 1. Download NetLogo from https://ccl.northwestern.edu/netlogo/
 2. Open a nlogo model (i.e. Attractors.nlogo)
 3. Click Setup
