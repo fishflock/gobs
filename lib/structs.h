@@ -5,7 +5,8 @@
 struct luRow
 {
     char epsilon[5];
-    int vector[4];
+    char vector[5];
+    // int vector[4];
 };
 
 #endif

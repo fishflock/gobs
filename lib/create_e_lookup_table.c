@@ -23,12 +23,10 @@ int create_e_table(struct luRow **ptrToLookupTable, int dir, int realSize, int *
     strcpy(lookupTable[0].epsilon, labels[1]);
 
     // Add the corresponding vector of first row to the epsilon table
-    for (int j = 0; j < dir; j++)
-    {
-        lookupTable[0].vector[j] = labels[1][j] - '0';
-    }
+    strcpy(lookupTable[0].vector, labels[1]);
+
     int fillTab = fill_e_table(flags, &lookupTable, dir, realSize, &matrix, &labels, ALPHA);
-    return 1;
+    return fillTab;
 }
 
 int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realSize, int ***ptrToMatrix, char ***ptrToLabels, double ALPHA)
@@ -40,7 +38,7 @@ int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realS
     int lastEl = 1;
     int currentLead = 1;
     double total = 0;
-    int i, h;
+    int h, i, j;
     // Loop through every row in matrix
     for (h = 2; h < realSize; h++)
     {
@@ -64,10 +62,7 @@ int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realS
                         // Add the LEADER'S label to the epsilon table
                         strcpy(lookupTable[lastEl].epsilon, labels[currentLead]);
                         // Add the follower's vector to the epsilon table
-                        for (int j = 0; j < dir; j++)
-                        {
-                            lookupTable[lastEl].vector[j] = labels[i][j] - '0';
-                        }
+                        strcpy(lookupTable[lastEl].vector, labels[i]);
                         lastEl++;
                     }
                 }
@@ -75,7 +70,19 @@ int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realS
         }
         currentLead++;
     }
-    return lastEl + 1;
+
+    int size = lastEl;
+    int uniqueEls = 0;
+    for (i = 0; i < size; i++)
+    {
+        for (j = i + 1; j < size; j++)
+            if (strcmp(lookupTable[i].epsilon, lookupTable[j].epsilon) == 0)
+                break;
+        if (j == size)
+            uniqueEls++;
+    }
+
+    return uniqueEls;
 }
 
 int compare_rows(int *row1, int *row2, int realSize, double *total)

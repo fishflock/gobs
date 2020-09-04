@@ -13,8 +13,6 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
 
     int i;
     int dir = 4;
-    char past[dir + 1];
-    char future[dir + 1];
     int currentPos = -1;
     int nextPos = -1;
 
@@ -23,7 +21,6 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
     char cvecAsString[5];
     char current[5];
     char next[5];
-    int count = 0;
 
     read_uncompressed_vectors(vector, dir + 1, input_file);
     for (i = 0; i < dir; i++)
@@ -70,12 +67,7 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
 
         for (i = 0; i < sizeofLookupTable; i++)
         {
-            char currPastVec[dir + 1];
-            for (int j = 0; j < dir; j++)
-                currPastVec[j] = lookupTable[i].vector[j] + '0';
-            currPastVec[dir] = '\0';
-
-            if (strcmp(current, currPastVec) == 0)
+            if (strcmp(current, lookupTable[i].vector) == 0)
             {
                 currentPos = get_epsilon_pos(lookupTable[i].epsilon, &lookupTable, sizeofLookupTable);
                 break;
@@ -84,12 +76,7 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
         // For each entry in the lookup table
         for (int j = 0; j < sizeofLookupTable; j++)
         {
-            char currFutureVec[dir + 1];
-            for (int i = 0; i < dir; i++)
-                currFutureVec[i] = lookupTable[j].vector[i] + '0';
-            currFutureVec[dir] = '\0';
-
-            if (strcmp(next, currFutureVec) == 0)
+            if (strcmp(next, lookupTable[j].vector) == 0)
             {
                 nextPos = get_epsilon_pos(lookupTable[j].epsilon, &lookupTable, sizeofLookupTable);
                 ;
@@ -104,8 +91,8 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
         else
         {
             printf("Could not find a position in the matrix to match: \n");
-            printf("past vector: %s\n", current);
-            printf("future vector: %s\n", next);
+            printf("Past vector: %s\n", current);
+            printf("Past+1 vector: %s\n", next);
         }
 
         strcpy(current, next);

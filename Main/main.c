@@ -102,7 +102,6 @@ int main()
 
     // Return # of group leaders ???
     int numGroups = create_e_table(&lookupTable, dir, realSize, &matrix, &labels, ALPHA);
-
     if (debug)
     {
         int printEMat = print_e_lookup(&lookupTable, realSize, &labels);
@@ -200,14 +199,15 @@ int print_e_lookup(struct luRow **ptrToLookupTable, int realSize, char ***ptrToL
         if (isdigit(lookupTable[i].epsilon[1]))
         {
             printf("%s : ", lookupTable[i].epsilon);
-            for (int k = 0; k < 4; k++)
-            {
-                printf("%d", lookupTable[i].vector[k]);
-                if (k == 3)
-                {
-                    printf("\n");
-                }
-            }
+            printf("%s\n", lookupTable[i].vector);
+            // for (int k = 0; k < 4; k++)
+            // {
+            //     printf("%d", lookupTable[i].vector[k]);
+            //     if (k == 3)
+            //     {
+            //         printf("\n");
+            //     }
+            // }
         }
     }
     printf("\n");
