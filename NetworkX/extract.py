@@ -70,32 +70,6 @@ def main():
     nx.draw_networkx(G, pos=layout, with_labels=True, font_weight='bold', node_size=size_arr, edgelist=[])
     nx.draw_networkx_edges(G, pos=layout, width=edge_arr)
     plt.show()
-
-
-
-
-
-##############################################################################
-
-#below function replaced by convert_matrix.from_numpy_matrix
-#will remove once positive above code works
-def dummy_double_loop():
-    row_num = 0
-    for row in values:
-        col_num = 0
-        for col in row:
-            #i = 0
-            if col != 0:
-                G.add_edge(labels[row_num], labels[col_num], weight=col)
-                
-                #print("adding edge to " + labels[row_num] + ", " + labels[col_num])
-                #i = i + 1
-            col_num = col_num + 1
-        row_num = row_num + 1
-
-    #print(list(G.edges(data=True)))
-    nx.draw_networkx(G, with_labels=True, font_weight='bold')
-    plt.show()
                 
 
     
