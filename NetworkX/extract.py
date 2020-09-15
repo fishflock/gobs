@@ -37,8 +37,31 @@ def main():
     labels = ep_arr[0]
     values = np.array(ep_arr[1])
     
-    G = nx.convert_matrix.from_numpy_matrix(values,parallel_edges=False, create_using=None)
-    nx.draw(G, with_labels=True, font_weight='bold')
+    G = nx.convert_matrix.from_numpy_matrix(values,parallel_edges=False,create_using=nx.DiGraph)
+
+    mapping = {}
+    i = 0
+    for l in labels:
+        mapping[i] = l
+        i = i + 1
+    G = nx.relabel_nodes(G,mapping)
+
+    size_array = []
+    for g1 in G:
+        in_weight = 0
+        out_weight = 0
+        for g2 in G:
+            if G.has_edge(g1,g2):
+                in_weight = in_weight + G[g1][g2]["weight"]
+            if g1 != g2 and G.has_edge(g2,g1):
+                out_weight = out_weight + G[g2][g1]["weight"]
+        G.nodes[g1]['weight'] = in_weight + out_weight
+        size_array.append(300 * (in_weight + out_weight))
+    print(G.nodes(data=True))
+    
+    #print(list(G.edges(data=True)))
+    #print(list(G.nodes(data=True)))
+    nx.draw(G, with_labels=True, font_weight='bold', node_size=size_array)
     plt.show()
 
 #below function replaced by convert_matrix.from_numpy_matrix
@@ -48,14 +71,16 @@ def dummy_double_loop():
     for row in values:
         col_num = 0
         for col in row:
-            i = 0
-            while i != col:
-                G.add_edge(labels[row_num], labels[col_num])
+            #i = 0
+            if col != 0:
+                G.add_edge(labels[row_num], labels[col_num], weight=col)
+                
                 #print("adding edge to " + labels[row_num] + ", " + labels[col_num])
-                i = i + 1
+                #i = i + 1
             col_num = col_num + 1
         row_num = row_num + 1
 
+    print(list(G.edges(data=True)))
     nx.draw(G, with_labels=True, font_weight='bold')
     plt.show()
                 
