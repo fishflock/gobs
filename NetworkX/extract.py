@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def read_ep_matrix():
-    ep_in = open("..\Main\output.txt")
+    ep_in = open("..\Main\output2.txt")
 
     #labels for the epsilon state transition matrix
     labels = []
@@ -28,7 +28,6 @@ def read_ep_matrix():
                 row_int.append(int(x))
             values.append(row_int)
         i = i + 1
-            
     return [labels, values]
 
 def main():
@@ -46,23 +45,37 @@ def main():
         i = i + 1
     G = nx.relabel_nodes(G,mapping)
 
-    size_array = []
+    node_arr = []
+    size_arr = []
+    edge_arr = []
     for g1 in G:
         in_weight = 0
         out_weight = 0
         for g2 in G:
             if G.has_edge(g1,g2):
                 in_weight = in_weight + G[g1][g2]["weight"]
+                edge_arr.append(G[g1][g2]["weight"])
             if g1 != g2 and G.has_edge(g2,g1):
                 out_weight = out_weight + G[g2][g1]["weight"]
-        G.nodes[g1]['weight'] = in_weight + out_weight
-        size_array.append(300 * (in_weight + out_weight))
-    print(G.nodes(data=True))
-    
-    #print(list(G.edges(data=True)))
-    #print(list(G.nodes(data=True)))
-    nx.draw(G, with_labels=True, font_weight='bold', node_size=size_array)
+        total_weight = in_weight + out_weight
+        G.nodes[g1]['weight'] = total_weight
+        if total_weight > 0:
+            size_arr.append(300 * (in_weight + out_weight))
+        else:
+            node_arr.append(g1)
+            
+    G.remove_nodes_from(node_arr)
+
+    layout = nx.drawing.layout.spring_layout(G,k=1,scale=None)
+    nx.draw_networkx(G, pos=layout, with_labels=True, font_weight='bold', node_size=size_arr, edgelist=[])
+    nx.draw_networkx_edges(G, pos=layout, width=edge_arr)
     plt.show()
+
+
+
+
+
+##############################################################################
 
 #below function replaced by convert_matrix.from_numpy_matrix
 #will remove once positive above code works
@@ -80,8 +93,8 @@ def dummy_double_loop():
             col_num = col_num + 1
         row_num = row_num + 1
 
-    print(list(G.edges(data=True)))
-    nx.draw(G, with_labels=True, font_weight='bold')
+    #print(list(G.edges(data=True)))
+    nx.draw_networkx(G, with_labels=True, font_weight='bold')
     plt.show()
                 
 
