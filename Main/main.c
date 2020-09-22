@@ -17,7 +17,7 @@ int BUFF_SIZE = 128;
 int MAX_SIZE = 816;
 char *DEF_INPUT_FILE = "sample";
 char *DEF_OUTPUT_FILE = "compressvector2";
-char *DEF_INPUT_FILEPATH = "input/";
+char *DEF_INPUT_FILEPATH = "Main/input/";
 char *DEF_OUTPUT_FILEPATH = "output/";
 double ALPHA = 0.0;
 
@@ -31,7 +31,7 @@ int main()
 {
     FILE *input_file;
     FILE *output_file;
-    char filename[BUFF_SIZE];
+    char *filename = (char *)malloc(BUFF_SIZE);
     char buffer[BUFF_SIZE];
     struct stat st = {0};
 
@@ -41,7 +41,19 @@ int main()
     printf("       Enter name of input file WITHOUT the .csv extension = ");
     fgets(buffer, BUFF_SIZE, stdin);
     sscanf(buffer, "%s", filename);
-    strcat(filename, ".csv");
+
+    int length = strlen(filename);
+    if ((length >= 5) &&
+        (strcmp(&filename[length - 4], ".csv") == 0))
+    {
+        printf("Importing data from %s...\n", filename);
+    }
+    else
+    {
+        printf("%s is an invalid file. Exiting program...\n", filename);
+        exit(1);
+    }
+
     strcpy(buffer, DEF_INPUT_FILEPATH);
     if (stat(buffer, &st) == -1)
     {
