@@ -3,6 +3,18 @@ from networkx.algorithms import community
 import matplotlib.pyplot as plt
 import numpy as np
 
+def colors():
+    return ['red',
+            'green',
+            'b',
+            'gold',
+            'm',
+            'c',
+            'teal',
+            'lime',
+            'crimson',
+            ]
+
 def group(G):
     #print(G.edges(data=True))
     groups = []
@@ -128,7 +140,7 @@ def graph(G):
     #change size of output window
     plt.figure(figsize=(12,7))
 
-    color_arr = ['#FF0000','#0000FF','#00FF00','#FFFF00','#00FFFF','#FF00FF']
+    color_arr = colors()
 
     #draw the nodes
     i = 0
