@@ -52,11 +52,11 @@ int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realS
                 {
                     total = 0;
                     compare_rows(matrix[currentLead], matrix[i], realSize, &total);
-                    //printf("Total: %f\n", total);
+                    //printf("Comparing %s to %s ---> Total: %f\n", labels[i], labels[currentLead], total);
 
-                    if (total > ALPHA)
+                    if (total < ALPHA)
                     {
-                        //printf("Adding %s to the %s group.\n", labels[i], labels[currentLead]);
+                        //printf("       Adding %s to the %s group.\n", labels[i], labels[currentLead]);
                         // Flag this row!
                         flags[i] = 1;
                         // Add the LEADER'S label to the epsilon table
@@ -111,20 +111,24 @@ int compare_rows(int *row1, int *row2, int realSize, double *total)
     // printf("k1: %f\n", k1);
     // printf("k2: %f\n", k2);
 
-    for (int k = 0; k < realSize; k++)
+    for (int k = 1; k < realSize; k++)
     {
+        // printf("row1[k]: %d\n", row1[k]);
+        // printf("row2[k]: %d\n", row2[k]);
         double denominator = row1[k] + row2[k];
         if (denominator != 0)
         {
             // ********* pow(x, y) = x raised to the power of y
             double numerator = pow((k1 * row1[k] - k2 * row2[k]), 2.0);
-            // printf("row1[k]: %d\n", row1[k]);
-            // printf("row2[k]: %d\n", row2[k]);
+
             // printf("k1 * row1[k]: %f\n", k1 * row1[k]);
             // printf("k2 * row2[k]: %f\n", k2 * row2[k]);
             // printf("numerator: %f\n", numerator);
             // printf("denominator: %f\n", denominator);
-            *total += numerator / denominator;
+            // printf("diff: %f\n", (numerator / denominator));
+            *total += (numerator / denominator);
+            // printf("Total: %f\n", *total);
+            // printf("\n\n");
         }
     }
 

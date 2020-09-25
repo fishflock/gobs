@@ -27,18 +27,18 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
     {
         cvec[i] = 0;
     }
-    printf("%s -> ", vector);
+    //printf("%s -> ", vector);
     // Get compressed vec
     for (i = 0; i < dir + 1; i++)
     {
         int val = vector[i] - '0';
         cvec[val - 1] += 1;
     }
-    for (i = 0; i < dir; i++)
-    {
-        printf("%d", cvec[i]);
-    }
-    printf("\n");
+    // for (i = 0; i < dir; i++)
+    // {
+    //     printf("%d", cvec[i]);
+    // }
+    // printf("\n");
     for (i = 0; i < dir; i++)
         current[i] = cvec[i] + '0';
     current[dir] = '\0';
@@ -49,18 +49,18 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
         {
             cvec[i] = 0;
         }
-        printf("%s -> ", vector);
+        //printf("%s -> ", vector);
         // Get compressed vec
         for (i = 0; i < dir + 1; i++)
         {
             int val = vector[i] - '0';
             cvec[val - 1] += 1;
         }
-        for (i = 0; i < dir; i++)
-        {
-            printf("%d", cvec[i]);
-        }
-        printf("\n");
+        // for (i = 0; i < dir; i++)
+        // {
+        //     printf("%d", cvec[i]);
+        // }
+        // printf("\n");
         for (i = 0; i < dir; i++)
             next[i] = cvec[i] + '0';
         next[dir] = '\0';
@@ -70,6 +70,7 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
             if (strcmp(current, lookupTable[i].vector) == 0)
             {
                 currentPos = get_epsilon_pos(lookupTable[i].epsilon, &lookupTable, sizeofLookupTable);
+                //printf("currentPos: %d\n", currentPos);
                 break;
             }
         }
@@ -79,7 +80,7 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
             if (strcmp(next, lookupTable[j].vector) == 0)
             {
                 nextPos = get_epsilon_pos(lookupTable[j].epsilon, &lookupTable, sizeofLookupTable);
-                ;
+                //printf("nextPos: %d\n", nextPos);
                 break;
             }
         }
@@ -137,11 +138,23 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
 int get_epsilon_pos(char *epString, struct luRow **ptrToLookupTable, int sizeofLookupTable)
 {
     struct luRow *lookupTable = *ptrToLookupTable;
+    int unique = 0;
     for (int m = 0; m < sizeofLookupTable; m++)
     {
+        if (m > 0)
+        {
+
+            if (strcmp(lookupTable[m - 1].epsilon, lookupTable[m].epsilon) == 1)
+            {
+                // printf("1: lookupTable[m - 1].epsilon ---> %s\n", lookupTable[m - 1].epsilon);
+                // printf("2: lookupTable[m].epsilon ---> %s\n", lookupTable[m].epsilon);
+                unique++;
+            }
+        }
+
         if (!strcmp(epString, lookupTable[m].epsilon))
         {
-            return m;
+            return unique;
         }
     }
     return -1;

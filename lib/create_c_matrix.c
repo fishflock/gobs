@@ -18,6 +18,7 @@ int create_c_matrix(int dir,
 
     int last_label_pos = 0;
     int i;
+    int numVecsRecorded = 0;
     while (read_cvec(past, future, file) != -1)
     {
         int past_pos = -1;
@@ -55,7 +56,9 @@ int create_c_matrix(int dir,
         }
 
         matrix[past_pos][future_pos]++;
+        numVecsRecorded++;
     }
+    printf("\n\n NUM VEC RECORDED: %d\n", numVecsRecorded);
     fseek(file, 0, SEEK_SET);
     return last_label_pos + 1;
 }
