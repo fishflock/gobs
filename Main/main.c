@@ -19,7 +19,7 @@ char *DEF_INPUT_FILE = "sample";
 char *DEF_OUTPUT_FILE = "compressvector2";
 char *DEF_INPUT_FILEPATH = "Main/input/";
 char *DEF_OUTPUT_FILEPATH = "output/";
-double ALPHA = 0.0;
+double ALPHA = 400;
 
 int debug = 1;
 
@@ -132,8 +132,7 @@ int main()
             eMat[i][j] = 0;
     }
 
-    int sizeofLookupTable = sizeof(lookupTable) / sizeof(lookupTable[0]);
-    int done = create_e_matrix(&lookupTable, 20, numGroups, &eMat, input_file, output_file);
+    int done = create_e_matrix(&lookupTable, realSize, numGroups, &eMat, input_file, output_file);
 
     fclose(input_file);
     fclose(output_file);
