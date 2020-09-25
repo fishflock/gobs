@@ -3,8 +3,67 @@ from networkx.algorithms import community
 import matplotlib.pyplot as plt
 import numpy as np
 
+def group(G):
+    #print(G.edges(data=True))
+    groups = []
+    done = []
+
+   
+    i = 1
+    for n in G:
+        if i == 1:
+            groups.append([n])
+            done.append(n)
+            i = 0
+        elif n not in done:
+            node = -1
+            in_edges = G.in_edges(n)
+            in_degree = -1
+            in_node = -1
+            
+            out_edges = G.out_edges(n)
+            out_degree = -1
+            out_node = -1
+            
+            for i in in_edges:
+                weight = G[i[0]][i[1]][0]['weight']
+                if weight > in_degree:
+                    in_node = i[0]
+                    in_degree = weight        
+            
+            for o in out_edges:
+                weight = G[o[0]][o[1]][0]['weight']
+                if weight > out_degree:                
+                    out_node = o[1]
+                    out_degree = weight
+
+            if in_degree > out_degree:
+                node = in_node
+            elif in_degree < out_degree:
+                node = out_node
+            elif in_degree > -1:
+                node = in_node
+            elif out_degree > -1:
+                node = out_node
+            
+            if node in done:
+                for g in groups:
+                    if node in g:
+                        g.append(n)
+
+            else:
+                groups.append([n, node])
+                done.append(node)
+
+            done.append(n)
+                
+    return groups
+        
+                         
+        
+
 def read_ep_matrix():
-    ep_in = open("..\Main\output2.txt")
+    ep_in = open("../Main/output2.txt")#/output.txt")
 
     #labels for the epsilon state transition matrix
     labels = []
@@ -55,24 +114,16 @@ def graph(G):
             node_arr.append(g1)
 
     #remove nodes with weight < 1 (no connections)
-    print("DONE PARSING NODES")
     G.remove_nodes_from(node_arr)
 
-    communities_generator = community.girvan_newman(G)
-    print("GIRVAN 1")
-    top_level_communities = next(communities_generator)
-    print("GIRVAN 2")
-    next_level_communities = next(communities_generator)
-    print("GIRVAN 3")
-    comms = sorted(map(sorted, next_level_communities))
-    print(len(comms))
+    groups = group(G)
 
     #create layout of nodes
     #k is optimal distance between nodes
     #seed sets the 'randomness' of the layout to be constant
     #iterations determine how many times algorithm is run,
     #    which results in closer nodes that are more strongly weight
-    layout = nx.spring_layout(G, k=1, seed=1, iterations=50)
+    layout = nx.spring_layout(G, k=1, seed=3, iterations=50)
 
     #change size of output window
     plt.figure(figsize=(12,7))
@@ -81,15 +132,15 @@ def graph(G):
 
     #draw the nodes
     i = 0
-    for c in comms:
+    for g in groups:
         s_arr = []
-        for node in c:
-            s_arr.append(300 * G.nodes[node]['weight'])
+        for n in g:
+            s_arr.append(300 * G.nodes[n]['weight'])
         nx.draw(G,
                 pos=layout,
                 with_labels=True,
                 font_weight='bold',
-                nodelist=c,
+                nodelist=g,
                 node_size=s_arr,
                 node_color=color_arr[i],
                 edgelist=[]
@@ -101,12 +152,13 @@ def graph(G):
                            pos=layout,
                            width=edge_arr,
                            connectionstyle='arc3,rad=0.2',
-                           node_size=size_arr
+                           node_size=size_arr,
+                           arrowsize=15
                            )
     plt.show()
 
 def face():
-    ep_in = open("Facebook1.csv")
+    ep_in = open("Facebook3.csv")
     G = nx.MultiDiGraph()
 
     mapping = {}
@@ -123,7 +175,6 @@ def face():
             mapping[i] = row[3]
             i = i + 1
 
-    print("DONE PARSING EXCEL")
     graph(G)
             
 
