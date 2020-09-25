@@ -27,18 +27,18 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
     {
         cvec[i] = 0;
     }
-    printf("%s -> ", vector);
+    //printf("%s -> ", vector);
     // Get compressed vec
     for (i = 0; i < dir + 1; i++)
     {
         int val = vector[i] - '0';
         cvec[val - 1] += 1;
     }
-    for (i = 0; i < dir; i++)
-    {
-        printf("%d", cvec[i]);
-    }
-    printf("\n");
+    // for (i = 0; i < dir; i++)
+    // {
+    //     printf("%d", cvec[i]);
+    // }
+    //printf("\n");
     for (i = 0; i < dir; i++)
         current[i] = cvec[i] + '0';
     current[dir] = '\0';
@@ -49,18 +49,18 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
         {
             cvec[i] = 0;
         }
-        printf("%s -> ", vector);
+        //printf("%s -> ", vector);
         // Get compressed vec
         for (i = 0; i < dir + 1; i++)
         {
             int val = vector[i] - '0';
             cvec[val - 1] += 1;
         }
-        for (i = 0; i < dir; i++)
-        {
-            printf("%d", cvec[i]);
-        }
-        printf("\n");
+        // for (i = 0; i < dir; i++)
+        // {
+        //     printf("%d", cvec[i]);
+        // }
+        // printf("\n");
         for (i = 0; i < dir; i++)
             next[i] = cvec[i] + '0';
         next[dir] = '\0';
