@@ -8,11 +8,11 @@
 // Must be uninitialized
 int create_c_matrix(int dir,
                     char ***ptrToLabels,
-                    int ***ptrToMatrix,
+                    double ***ptrToMatrix,
                     FILE *file)
 {
     char **labels = *ptrToLabels;
-    int **matrix = *ptrToMatrix;
+    double **matrix = *ptrToMatrix;
     char past[dir + 1];
     char future[dir + 1];
 
