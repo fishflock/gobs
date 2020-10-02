@@ -19,11 +19,11 @@ char *DEF_INPUT_FILE = "sample";
 char *DEF_OUTPUT_FILE = "compressvector2";
 char *DEF_INPUT_FILEPATH = "Main/input/";
 char *DEF_OUTPUT_FILEPATH = "output/";
-double ALPHA = 400;
+double ALPHA = 0.0;
 
 int debug = 1;
 
-int print_c_matrix(int realSize, char ***ptrToLabels, int ***ptrToMatrix);
+int print_c_matrix(int realSize, char ***ptrToLabels, double ***ptrToMatrix);
 int print_labels(int realSize, char ***ptrToLabels);
 int print_e_lookup(struct luRow **ptrToLookupTable, int realSize, char ***ptrToLabels);
 
@@ -86,11 +86,11 @@ int main()
     }
 
     // INITIALIZE MATRIX AS A 2D INT ARRAY WITH DIMENSIONS: MAX_SIZE*MAX_SIZE
-    int **matrix = NULL;
-    matrix = (int **)malloc(sizeof(int *) * MAX_SIZE);
+    double **matrix = NULL;
+    matrix = (double **)malloc(sizeof(double *) * MAX_SIZE);
     for (i = 0; i < MAX_SIZE; i++)
     {
-        matrix[i] = (int *)malloc(MAX_SIZE);
+        matrix[i] = (double *)malloc(MAX_SIZE);
     }
     for (int i = 0; i < MAX_SIZE; i++)
     {
@@ -112,6 +112,44 @@ int main()
     //struct luRow lookupTable[100];
     struct luRow *lookupTable = (struct luRow *)malloc(sizeof(struct luRow) * MAX_SIZE);
 
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // for (int i = 0; i < MAX_SIZE; i++)
+    // {
+    //     for (int j = 0; j < MAX_SIZE; j++)
+    //         matrix[i][j] = 0;
+    // }
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    double **cenekTest = NULL;
+    cenekTest = (double **)malloc(sizeof(double *) * 2);
+    for (i = 0; i < 8; i++)
+    {
+        cenekTest[i] = (double *)malloc(sizeof(double) * 8);
+    }
+    cenekTest[0][0] = 0;
+    cenekTest[0][1] = 1;
+    cenekTest[0][2] = 3;
+    cenekTest[0][3] = 1;
+    cenekTest[0][4] = 4;
+    cenekTest[0][5] = 1;
+    cenekTest[0][6] = 1;
+    cenekTest[0][7] = 3;
+
+    cenekTest[1][0] = 0;
+    cenekTest[1][1] = 1;
+    cenekTest[1][2] = 2;
+    cenekTest[1][3] = 1;
+    cenekTest[1][4] = 4;
+    cenekTest[1][5] = 1;
+    cenekTest[1][6] = 1;
+    cenekTest[1][7] = 2;
+
+    realSize = 8;
+    reduce_noise(realSize, &cenekTest);
+
+    double total = 0;
+    compare_rows(cenekTest[0], cenekTest[1], realSize, &total);
+
     // Return # of group leaders ???
     int numGroups = create_e_table(&lookupTable, dir, realSize, &matrix, &labels, ALPHA);
     if (debug)
@@ -132,7 +170,8 @@ int main()
             eMat[i][j] = 0;
     }
 
-    int done = create_e_matrix(&lookupTable, realSize, numGroups, &eMat, input_file, output_file);
+    int sizeofLookupTable = sizeof(lookupTable) / sizeof(lookupTable[0]);
+    int done = create_e_matrix(&lookupTable, 20, numGroups, &eMat, input_file, output_file);
 
     fclose(input_file);
     fclose(output_file);
@@ -174,16 +213,16 @@ int main()
 //##################################################################################
 // HELPER METHODS FOR PRINTING TO TERMINAL
 
-int print_c_matrix(int realSize, char ***ptrToLabels, int ***ptrToMatrix)
+int print_c_matrix(int realSize, char ***ptrToLabels, double ***ptrToMatrix)
 {
     char **labels = *ptrToLabels;
-    int **matrix = *ptrToMatrix;
+    double **matrix = *ptrToMatrix;
     printf("\n\nCo-occurrence Matrix: \n");
     for (int i = 1; i < realSize; i++)
     {
         printf("%s ", labels[i]);
         for (int j = 1; j < realSize; j++)
-            printf("%d ", matrix[i][j]);
+            printf("%f ", matrix[i][j]);
         printf("\n");
     }
     return 1;

@@ -4,6 +4,6 @@
 
 int create_c_matrix(int dir,
                     char ***ptrToLabels,
-                    int ***ptrToMatrix, FILE *file);
+                    double ***ptrToMatrix, FILE *file);
 
 #endif

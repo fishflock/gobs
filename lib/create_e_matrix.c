@@ -38,7 +38,7 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
     // {
     //     printf("%d", cvec[i]);
     // }
-    // printf("\n");
+    //printf("\n");
     for (i = 0; i < dir; i++)
         current[i] = cvec[i] + '0';
     current[dir] = '\0';

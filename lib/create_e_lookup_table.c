@@ -4,11 +4,11 @@
 #include <math.h>
 #include "create_e_lookup_table.h"
 
-int create_e_table(struct luRow **ptrToLookupTable, int dir, int realSize, int ***ptrToMatrix, char ***ptrToLabels, double ALPHA)
+int create_e_table(struct luRow **ptrToLookupTable, int dir, int realSize, double ***ptrToMatrix, char ***ptrToLabels, double ALPHA)
 {
     struct luRow *lookupTable = *ptrToLookupTable;
     char **labels = *ptrToLabels;
-    int **matrix = *ptrToMatrix;
+    double **matrix = *ptrToMatrix;
 
     // Create flags array (each flag corresponds to a row)
     int flags[realSize];
@@ -29,22 +29,22 @@ int create_e_table(struct luRow **ptrToLookupTable, int dir, int realSize, int *
     return fillTab;
 }
 
-int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realSize, int ***ptrToMatrix, char ***ptrToLabels, double ALPHA)
+int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realSize, double ***ptrToMatrix, char ***ptrToLabels, double ALPHA)
 {
     struct luRow *lookupTable = *ptrToLookupTable;
     char **labels = *ptrToLabels;
-    int **matrix = *ptrToMatrix;
+    double **matrix = *ptrToMatrix;
 
     int lastEl = 1;
     int currentLead = 1;
     double total = 0;
-    int h, i, j;
+    int i, j;
     // Loop through every row in matrix
-    for (h = 2; h < realSize; h++)
+    for (currentLead = 1; currentLead < realSize; currentLead++)
     {
         //printf("...labels[currentLead]: %s\n", labels[currentLead]);
         // IF it hasn't been flagged yet, compare it to all the others
-        if (flags[h] == 0)
+        if (flags[currentLead] == 0)
         {
             for (i = 2; i < realSize; i++)
             {
@@ -68,35 +68,35 @@ int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realS
                 }
             }
         }
-        currentLead++;
     }
 
-    int size = lastEl;
+    //int size = lastEl;
     int uniqueEls = 0;
-    for (i = 0; i < size; i++)
+    for (i = 0; i < lastEl; i++)
     {
-        for (j = i + 1; j < size; j++)
+        for (j = i + 1; j < lastEl; j++)
             if (strcmp(lookupTable[i].epsilon, lookupTable[j].epsilon) == 0)
                 break;
-        if (j == size)
+        if (j == lastEl)
             uniqueEls++;
     }
 
     return uniqueEls;
 }
 
-int compare_rows(int *row1, int *row2, int realSize, double *total)
+int compare_rows(double *row1, double *row2, int realSize, double *total)
 {
-    int sum1 = 0;
-    int sum2 = 0;
+    double sum1 = 0;
+    double sum2 = 0;
 
-    for (int i = 0; i < realSize; i++)
+    for (int i = 1; i < realSize; i++)
     {
+        printf("%f : %f\n", row1[i], row2[i]);
         sum1 += row1[i];
         sum2 += row2[i];
     }
-    // printf("sum1: %d\n", sum1);
-    // printf("sum2: %d\n", sum2);
+    printf("sum1: %f\n", sum1);
+    printf("sum2: %f\n", sum2);
 
     double k1 = 0;
     if (sum1 != 0)
@@ -108,13 +108,13 @@ int compare_rows(int *row1, int *row2, int realSize, double *total)
     {
         k2 = sqrt(sum1 / sum2);
     }
-    // printf("k1: %f\n", k1);
-    // printf("k2: %f\n", k2);
+    printf("k1: %f\n", k1);
+    printf("k2: %f\n", k2);
 
     for (int k = 1; k < realSize; k++)
     {
-        // printf("row1[k]: %d\n", row1[k]);
-        // printf("row2[k]: %d\n", row2[k]);
+        printf("row1[k]: %f\n", row1[k]);
+        printf("row2[k]: %f\n", row2[k]);
         double denominator = row1[k] + row2[k];
         if (denominator != 0)
         {
@@ -123,14 +123,46 @@ int compare_rows(int *row1, int *row2, int realSize, double *total)
 
             // printf("k1 * row1[k]: %f\n", k1 * row1[k]);
             // printf("k2 * row2[k]: %f\n", k2 * row2[k]);
-            // printf("numerator: %f\n", numerator);
-            // printf("denominator: %f\n", denominator);
+            printf("numerator: %f\n", numerator);
+            printf("denominator: %f\n", denominator);
             // printf("diff: %f\n", (numerator / denominator));
             *total += (numerator / denominator);
-            // printf("Total: %f\n", *total);
-            // printf("\n\n");
+            printf("Total: %f\n", *total);
+            printf("\n\n");
         }
     }
 
+    return 1;
+}
+
+int reduce_noise(int realSize, double ***ptrToMatrix)
+{
+    double **matrix = *ptrToMatrix;
+    int i, j;
+    int matrixSum = 0;
+    for (i = 0; i < 2; i++)
+    {
+        for (j = 1; j < realSize; j++)
+        {
+            matrixSum += matrix[i][j];
+        }
+    }
+
+    matrixSum = 146;
+    printf("Matrix Sum = %d\n", matrixSum);
+
+    for (i = 0; i < 2; i++)
+    {
+        for (j = 1; j < realSize; j++)
+        {
+            printf("%f ---> ", matrix[i][j]);
+            printf("%f ---> ", matrix[i][j] / matrixSum);
+
+            double test = matrix[i][j] / matrixSum;
+            printf("%f ---> ", log10(test));
+            matrix[i][j] = fabs(log10(matrix[i][j] / matrixSum));
+            printf("Applied abs/log to [%d][%d]:    %f\n", i, j, matrix[i][j]);
+        }
+    }
     return 1;
 }
