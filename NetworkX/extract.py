@@ -2,6 +2,7 @@ import networkx as nx
 from networkx.algorithms import community
 import matplotlib.pyplot as plt
 import numpy as np
+import random
 
 def colors():
     return ['red',
@@ -13,6 +14,48 @@ def colors():
             'teal',
             'lime',
             'crimson',
+            '#6f3d92', 
+            '#70ab34' ,
+            '#8eb44c' ,
+            '#7eb639' ,
+            '#ffc125' ,
+            '#ffd700' ,
+            '#ffa500' ,
+            '#50a8e0' ,
+            '#80b048' ,
+            '#d8d1c4' ,
+            '#ebe8e1' ,
+            '#d5b0a8' ,
+            '#eaf4ea' ,
+            '#fdeb40' ,
+            '#f2b04b' ,
+            '#f27e4b' ,
+            '#f24b4b' ,
+            '#f2fbff' ,
+            '#e1e8ef' ,
+            '#dafff9' ,
+            '#e0ffda' ,
+            '#dae0ff' ,
+            '#ffdae0' ,
+            '#ffc0cb' ,
+            '#98b1e4' ,
+            '#97c4f5' ,
+            '#7df0e0' ,
+            '#87fbcc' ,
+            '#91eec1' ,
+            '#d7efe6' ,
+            '#cacbd3' ,
+            '#e5bfab' ,
+            '#841607' ,
+            '#4b5f81' ,
+            '#669966' ,
+            '#77a45c' ,
+            '#cccc33' ,
+            '#e3e129' ,
+            '#ff33ff' ,
+            '#f544fe' ,
+            '#cc9933' ,
+            '#db8c28'
             ]
 
 def group(G):
@@ -75,7 +118,7 @@ def group(G):
         
 
 def read_ep_matrix():
-    ep_in = open("../Main/output2.txt")#/output.txt")
+    ep_in = open("../Main/complex.txt")
 
     #labels for the epsilon state transition matrix
     labels = []
@@ -128,14 +171,19 @@ def graph(G):
     #remove nodes with weight < 1 (no connections)
     G.remove_nodes_from(node_arr)
 
-    groups = group(G)
+    groups = []
+    lpa = nx.algorithms.community.label_propagation.asyn_lpa_communities(G)
+    for x in lpa:
+        groups.append(x)
+
+    #groups = group(G)
 
     #create layout of nodes
     #k is optimal distance between nodes
     #seed sets the 'randomness' of the layout to be constant
     #iterations determine how many times algorithm is run,
-    #    which results in closer nodes that are more strongly weight
-    layout = nx.spring_layout(G, k=1, seed=3, iterations=50)
+    #    which results in closer nodes that are more strongly connected
+    layout = nx.spring_layout(G, k=1, seed=11, iterations=50)
 
     #change size of output window
     plt.figure(figsize=(12,7))
@@ -170,7 +218,7 @@ def graph(G):
     plt.show()
 
 def face():
-    ep_in = open("Facebook3.csv")
+    ep_in = open("Facebook1.csv")
     G = nx.MultiDiGraph()
 
     mapping = {}
@@ -209,10 +257,6 @@ def main():
     G = nx.relabel_nodes(G,mapping)
 
     graph(G)
-    
-
-                
-
     
             
     
