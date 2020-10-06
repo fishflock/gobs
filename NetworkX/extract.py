@@ -11,111 +11,7 @@ def colors():
             'gold',
             'm',
             'c',
-            'teal',
-            'lime',
-            'crimson',
-            '#6f3d92', 
-            '#70ab34' ,
-            '#8eb44c' ,
-            '#7eb639' ,
-            '#ffc125' ,
-            '#ffd700' ,
-            '#ffa500' ,
-            '#50a8e0' ,
-            '#80b048' ,
-            '#d8d1c4' ,
-            '#ebe8e1' ,
-            '#d5b0a8' ,
-            '#eaf4ea' ,
-            '#fdeb40' ,
-            '#f2b04b' ,
-            '#f27e4b' ,
-            '#f24b4b' ,
-            '#f2fbff' ,
-            '#e1e8ef' ,
-            '#dafff9' ,
-            '#e0ffda' ,
-            '#dae0ff' ,
-            '#ffdae0' ,
-            '#ffc0cb' ,
-            '#98b1e4' ,
-            '#97c4f5' ,
-            '#7df0e0' ,
-            '#87fbcc' ,
-            '#91eec1' ,
-            '#d7efe6' ,
-            '#cacbd3' ,
-            '#e5bfab' ,
-            '#841607' ,
-            '#4b5f81' ,
-            '#669966' ,
-            '#77a45c' ,
-            '#cccc33' ,
-            '#e3e129' ,
-            '#ff33ff' ,
-            '#f544fe' ,
-            '#cc9933' ,
-            '#db8c28'
-            ]
-
-def group(G):
-    #print(G.edges(data=True))
-    groups = []
-    done = []
-
-   
-    i = 1
-    for n in G:
-        if i == 1:
-            groups.append([n])
-            done.append(n)
-            i = 0
-        elif n not in done:
-            node = -1
-            in_edges = G.in_edges(n)
-            in_degree = -1
-            in_node = -1
-            
-            out_edges = G.out_edges(n)
-            out_degree = -1
-            out_node = -1
-            
-            for i in in_edges:
-                weight = G[i[0]][i[1]][0]['weight']
-                if weight > in_degree:
-                    in_node = i[0]
-                    in_degree = weight        
-            
-            for o in out_edges:
-                weight = G[o[0]][o[1]][0]['weight']
-                if weight > out_degree:                
-                    out_node = o[1]
-                    out_degree = weight
-
-            if in_degree > out_degree:
-                node = in_node
-            elif in_degree < out_degree:
-                node = out_node
-            elif in_degree > -1:
-                node = in_node
-            elif out_degree > -1:
-                node = out_node
-            
-            if node in done:
-                for g in groups:
-                    if node in g:
-                        g.append(n)
-
-            else:
-                groups.append([n, node])
-                done.append(node)
-
-            done.append(n)
-                
-    return groups
-        
-                         
-        
+            ]     
 
 def read_ep_matrix():
     ep_in = open("../Main/complex.txt")
@@ -143,8 +39,6 @@ def read_ep_matrix():
 def graph(G):
 
     node_arr = [] #stores nodes with total weight < 1
-    edge_arr = [] #stores edges of graph G
-    size_arr = [] #stores sizes of edges
 
     #iterates through each node and compares it to each other node (including itself)
     #calculates in, out, and total weights
@@ -156,14 +50,12 @@ def graph(G):
         for g2 in G:   
             if G.has_edge(g1,g2):
                 in_weight = in_weight + G[g1][g2][0]["weight"]
-                edge_arr.append(G[g1][g2][0]["weight"])
             if g1 != g2 and G.has_edge(g2,g1):
                 out_weight = out_weight + G[g2][g1][0]["weight"]
 
         total_weight = in_weight + out_weight
         
         if total_weight > 0:
-            size_arr.append(300 * (total_weight))
             G.nodes[g1]['weight'] = total_weight
         else:
             node_arr.append(g1)
@@ -171,52 +63,67 @@ def graph(G):
     #remove nodes with weight < 1 (no connections)
     G.remove_nodes_from(node_arr)
 
+    #perform Label Propogation Algorithm to group nodes
     groups = []
     lpa = nx.algorithms.community.label_propagation.asyn_lpa_communities(G)
     for x in lpa:
         groups.append(x)
-
-    #groups = group(G)
 
     #create layout of nodes
     #k is optimal distance between nodes
     #seed sets the 'randomness' of the layout to be constant
     #iterations determine how many times algorithm is run,
     #    which results in closer nodes that are more strongly connected
-    layout = nx.spring_layout(G, k=1, seed=11, iterations=50)
+    layout = nx.spring_layout(G, k=1, seed=16, iterations=50)
 
     #change size of output window
     plt.figure(figsize=(12,7))
 
+    #returns an array of the first 6 colors used in graph
     color_arr = colors()
 
-    #draw the nodes
+    #draw the graph
     i = 0
     for g in groups:
+        edge_list_arr = []
+        edge_size_arr = []
         s_arr = []
         for n in g:
             s_arr.append(300 * G.nodes[n]['weight'])
-        nx.draw(G,
+            for e in G.edges(n):
+                edge_list_arr.append(e)
+                edge_size_arr.append(G[e[0]][e[1]][0]['weight'])
+        if i > 5:
+            c = [[random.random(),random.random(),random.random()]]
+        else:
+            c = color_arr[i]
+
+        #draw the nodes
+        nx.draw_networkx(G,
                 pos=layout,
                 with_labels=True,
                 font_weight='bold',
                 nodelist=g,
                 node_size=s_arr,
-                node_color=color_arr[i],
-                edgelist=[]
+                node_color=c,
+                edgelist=[],
+                edge_color=c
+                )
+
+        #draw the edges
+        nx.draw_networkx_edges(G,
+                pos=layout,
+                width=edge_size_arr,
+                edge_color=c,
+                edgelist=edge_list_arr,
+                connectionstyle='arc3,rad=0.2',
+                arrowsize=1
                 )
         i = i + 1
-
-    #draw the edges
-    nx.draw_networkx_edges(G,
-                           pos=layout,
-                           width=edge_arr,
-                           connectionstyle='arc3,rad=0.2',
-                           node_size=size_arr,
-                           arrowsize=15
-                           )
+    
     plt.show()
 
+#function for testing with Facebook data
 def face():
     ep_in = open("Facebook1.csv")
     G = nx.MultiDiGraph()
@@ -237,7 +144,7 @@ def face():
 
     graph(G)
             
-
+#main function, reads input from output of GOBS
 def main():
 
     #read in values from epsilon state matrix, separate into labels and data
