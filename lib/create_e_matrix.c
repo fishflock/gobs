@@ -8,8 +8,6 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
 {
     struct luRow *lookupTable = *ptrToLookupTable;
     int **eMat = *ptrToEMat;
-    printf("\n\nsize of e matrix: %d\n", numRows);
-    printf("sizeofLookupTable: %d\n\n", sizeofLookupTable);
 
     int i;
     int dir = 4;

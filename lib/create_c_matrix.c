@@ -9,7 +9,7 @@
 int create_c_matrix(int dir,
                     char ***ptrToLabels,
                     double ***ptrToMatrix,
-                    FILE *file)
+                    FILE *file, int *numVecsRecorded)
 {
     char **labels = *ptrToLabels;
     double **matrix = *ptrToMatrix;
@@ -18,7 +18,7 @@ int create_c_matrix(int dir,
 
     int last_label_pos = 0;
     int i;
-    int numVecsRecorded = 0;
+    *numVecsRecorded = 0;
     while (read_cvec(past, future, file) != -1)
     {
         int past_pos = -1;
@@ -33,9 +33,9 @@ int create_c_matrix(int dir,
         if (past_pos == -1)
         {
             //printf("Couldn't find a PAST match. Adding a new label!\n");
-            last_label_pos++;
             strcpy(labels[last_label_pos], past);
             past_pos = last_label_pos;
+            last_label_pos++;
         }
 
         int future_pos = -1;
@@ -50,15 +50,32 @@ int create_c_matrix(int dir,
         if (future_pos == -1)
         {
             //printf("Couldn't find a FUTURE match. Adding a new label!\n");
-            last_label_pos++;
             strcpy(labels[last_label_pos], future);
             future_pos = last_label_pos;
+            last_label_pos++;
         }
 
         matrix[past_pos][future_pos]++;
-        numVecsRecorded++;
+        *numVecsRecorded = *numVecsRecorded + 1;
     }
-    printf("\n\n NUM VEC RECORDED: %d\n", numVecsRecorded);
+    printf("\n\n NUM VEC RECORDED: %d\n", *numVecsRecorded);
     fseek(file, 0, SEEK_SET);
-    return last_label_pos + 1;
+    return last_label_pos;
+}
+
+int normalize_c_matrix(int realSize, double ***ptrToMatrix, int numVecsRecorded, int historyLength)
+{
+    int denominator = numVecsRecorded - 2 * historyLength;
+    printf("Normalizing C matrix by a factor of: %d\n", denominator);
+    double **matrix = *ptrToMatrix;
+    int i, j;
+    int matrixSum = 0;
+    for (i = 0; i < realSize; i++)
+    {
+        for (j = 0; j < realSize; j++)
+        {
+            matrix[i][j] = matrix[i][j] / denominator;
+        }
+    }
+    return 1;
 }
