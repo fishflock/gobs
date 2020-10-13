@@ -4,6 +4,11 @@
 
 int create_c_matrix(int dir,
                     char ***ptrToLabels,
-                    double ***ptrToMatrix, FILE *file);
+                    double ***ptrToMatrix, FILE *file, int *numVecsRecorded);
+
+int normalize_c_matrix(int realSize,
+                       double ***ptrToMatrix,
+                       int numVecsRecorded,
+                       int historyLength);
 
 #endif
