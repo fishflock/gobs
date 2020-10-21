@@ -17,7 +17,7 @@ int BUFF_SIZE = 128;
 int MAX_SIZE = 816;
 char *DEF_INPUT_FILE = "sample";
 char *DEF_OUTPUT_FILE = "compressvector2";
-char *DEF_INPUT_FILEPATH = "Main/input/";
+//char *DEF_INPUT_FILEPATH = "Main/input/";
 char *DEF_OUTPUT_FILEPATH = "output/";
 double ALPHA = 1.0;
 
@@ -37,25 +37,25 @@ int main(int argc, char *argv[])
     struct stat st = {0};
 
     // Open input file
-    strcpy(filename, argv[1]);
+    strcpy(filename, argv[2]);
 
     int normalize;
-    if (argv[2] == NULL)
+    if (argv[3] == NULL)
     {
         normalize = 0;
     }
     else
     {
-        normalize = atoi(argv[2]);
+        normalize = atoi(argv[3]);
     }
     int reduceNoiseFlag;
-    if (argv[3] == NULL)
+    if (argv[4] == NULL)
     {
         reduceNoiseFlag = 0;
     }
     else
     {
-        reduceNoiseFlag = atoi(argv[2]);
+        reduceNoiseFlag = atoi(argv[4]);
     }
 
     int length = strlen(filename);
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    strcpy(buffer, DEF_INPUT_FILEPATH);
+    strcpy(buffer, argv[1]);
     if (stat(buffer, &st) == -1)
     {
         perror("stat");
@@ -117,17 +117,18 @@ int main(int argc, char *argv[])
     // Create c matrix
     int numVecsRecorded;
     int sizeOfCMatrix = create_c_matrix(dir, &labels, &matrix, input_file, &numVecsRecorded);
-    if (normalize)
-    {
-        int normalize = normalize_c_matrix(sizeOfCMatrix, &matrix, numVecsRecorded, 5);
-    }
     printf("C matrix is %dx%d\n", sizeOfCMatrix, sizeOfCMatrix);
     printf("Number of unqiue vectors (size of labels array) %d\n", sizeOfCMatrix);
-
     if (debug)
     {
         int printCMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
         int printLabels = print_labels(sizeOfCMatrix, &labels);
+    }
+    if (normalize)
+    {
+        int normalize = normalize_c_matrix(sizeOfCMatrix, &matrix, numVecsRecorded, 5);
+        printf("C Matrix Normalized by Number of Vectors: \n");
+        int normalizedMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
     }
 
     // Create the epsilon lookup table
@@ -175,6 +176,7 @@ int main(int argc, char *argv[])
     if (reduceNoiseFlag)
     {
         reduce_noise(sizeOfCMatrix, &matrix);
+        printf("C Matrix with Reduced Noise: \n");
         int reducedMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
     }
 
@@ -245,7 +247,7 @@ int print_c_matrix(int sizeOfCMatrix, char ***ptrToLabels, double ***ptrToMatrix
 {
     char **labels = *ptrToLabels;
     double **matrix = *ptrToMatrix;
-    printf("\n\nCo-occurrence Matrix: \n");
+    printf("Co-occurrence Matrix: \n");
     for (int i = 0; i < sizeOfCMatrix; i++)
     {
         printf("%s ", labels[i]);
