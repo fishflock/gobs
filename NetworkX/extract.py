@@ -1,6 +1,7 @@
 import networkx as nx
-from networkx.algorithms import community
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches 
+from matplotlib.collections import PatchCollection
 import numpy as np
 import random
 
@@ -14,7 +15,7 @@ def colors():
             ]     
 
 def read_ep_matrix():
-    ep_in = open("../Main/complex.txt")
+    ep_in = open("../Main/output.txt")
 
     #labels for the epsilon state transition matrix
     labels = []
@@ -36,6 +37,20 @@ def read_ep_matrix():
         i = i + 1
     return [labels, values]
 
+def self_loop(ax, center, radius, facecolor, edgecolor, weight,
+              theta1=-30, theta2=210):
+    print(radius)
+    # Add the ring
+    rwidth = 0.02
+    ring = mpatches.Wedge(center, radius, theta1, theta2, width=weight)
+    
+    p = PatchCollection(
+        [ring], 
+        edgecolor = facecolor, 
+        facecolor = facecolor
+    )
+    ax.add_collection(p)
+
 def graph(G):
 
     node_arr = [] #stores nodes with total weight < 1
@@ -47,7 +62,7 @@ def graph(G):
         out_weight = 0
 
         #calculate weight for each node connected to g1
-        for g2 in G:   
+        for g2 in G:            
             if G.has_edge(g1,g2):
                 in_weight = in_weight + G[g1][g2][0]["weight"]
             if g1 != g2 and G.has_edge(g2,g1):
@@ -74,10 +89,10 @@ def graph(G):
     #seed sets the 'randomness' of the layout to be constant
     #iterations determine how many times algorithm is run,
     #    which results in closer nodes that are more strongly connected
-    layout = nx.spring_layout(G, k=1, seed=16, iterations=50)
+    layout = nx.spring_layout(G, k=1, seed=24, iterations=40)
 
     #change size of output window
-    plt.figure(figsize=(12,7))
+    fig, ax = plt.subplots(figsize=(15,10))
 
     #returns an array of the first 6 colors used in graph
     color_arr = colors()
@@ -88,26 +103,33 @@ def graph(G):
         edge_list_arr = []
         edge_size_arr = []
         s_arr = []
-        for n in g:
-            s_arr.append(300 * G.nodes[n]['weight'])
-            for e in G.edges(n):
-                edge_list_arr.append(e)
-                edge_size_arr.append(G[e[0]][e[1]][0]['weight'])
         if i > 5:
             c = [[random.random(),random.random(),random.random()]]
         else:
             c = color_arr[i]
+        for n in g:
+            s_arr.append(300 * G.nodes[n]['weight'])
+            for e in G.edges(n):
+                if(e[0] == e[1]):
+                    w = G.nodes[e[0]]['weight']
+                    self_loop(ax=ax,
+                              center=(layout[e[0]][0],layout[e[0]][1]+ w/100),
+                              radius=w/200,
+                              facecolor=c, edgecolor=c,
+                              weight=G[e[0]][e[1]][0]['weight']/900
+                              )
+                edge_list_arr.append(e)
+                edge_size_arr.append(G[e[0]][e[1]][0]['weight'])   
 
         #draw the nodes
         nx.draw_networkx(G,
                 pos=layout,
                 with_labels=True,
-                font_weight='bold',
+                #font_weight='bold',
                 nodelist=g,
                 node_size=s_arr,
                 node_color=c,
                 edgelist=[],
-                edge_color=c
                 )
 
         #draw the edges
@@ -120,12 +142,12 @@ def graph(G):
                 arrowsize=1
                 )
         i = i + 1
-    
+
     plt.show()
 
 #function for testing with Facebook data
 def face():
-    ep_in = open("Facebook1.csv")
+    ep_in = open("Facebook2.csv")
     G = nx.MultiDiGraph()
 
     mapping = {}
@@ -164,6 +186,4 @@ def main():
     G = nx.relabel_nodes(G,mapping)
 
     graph(G)
-    
-            
     
