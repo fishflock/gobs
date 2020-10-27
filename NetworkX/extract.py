@@ -13,7 +13,7 @@ def colors():
             ]     
 
 def read_ep_matrix():
-    ep_in = open("../Main/output.txt")
+    ep_in = open('output.txt')
 
     #labels for the epsilon state transition matrix
     labels = []
@@ -145,23 +145,23 @@ def face():
     graph(G)
             
 #main function, reads input from output of GOBS
-def main():
 
-    #read in values from epsilon state matrix, separate into labels and data
-    ep_arr = read_ep_matrix()
-    labels = ep_arr[0]
-    values = np.array(ep_arr[1])
 
-    #convert values from matrix into a graph
-    G = nx.convert_matrix.from_numpy_matrix(values,create_using=nx.MultiDiGraph)
+#read in values from epsilon state matrix, separate into labels and data
+ep_arr = read_ep_matrix()
+labels = ep_arr[0]
+values = np.array(ep_arr[1])
 
-    #relabel the nodes using labels
-    mapping = {}
-    i = 0
-    for l in labels:
-        mapping[i] = l
-        i = i + 1
-    G = nx.relabel_nodes(G,mapping)
+#convert values from matrix into a graph
+G = nx.convert_matrix.from_numpy_matrix(values,create_using=nx.MultiDiGraph)
 
-    graph(G)
+#relabel the nodes using labels
+mapping = {}
+i = 0
+for l in labels:
+    mapping[i] = l
+    i = i + 1
+G = nx.relabel_nodes(G,mapping)
+
+graph(G)
     
