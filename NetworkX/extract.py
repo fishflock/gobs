@@ -1,14 +1,12 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches 
-from matplotlib.collections import PatchCollection
 import numpy as np
 import random
 
 def colors():
     return ['red',
-            'green',
             'b',
+            'green',
             'gold',
             'm',
             'c',
@@ -36,20 +34,6 @@ def read_ep_matrix():
             values.append(row_int)
         i = i + 1
     return [labels, values]
-
-def self_loop(ax, center, radius, facecolor, edgecolor, weight,
-              theta1=-30, theta2=210):
-    print(radius)
-    # Add the ring
-    rwidth = 0.02
-    ring = mpatches.Wedge(center, radius, theta1, theta2, width=weight)
-    
-    p = PatchCollection(
-        [ring], 
-        edgecolor = facecolor, 
-        facecolor = facecolor
-    )
-    ax.add_collection(p)
 
 def graph(G):
 
@@ -112,12 +96,6 @@ def graph(G):
             for e in G.edges(n):
                 if(e[0] == e[1]):
                     w = G.nodes[e[0]]['weight']
-                    self_loop(ax=ax,
-                              center=(layout[e[0]][0],layout[e[0]][1]+ w/100),
-                              radius=w/200,
-                              facecolor=c, edgecolor=c,
-                              weight=G[e[0]][e[1]][0]['weight']/900
-                              )
                 edge_list_arr.append(e)
                 edge_size_arr.append(G[e[0]][e[1]][0]['weight'])   
 
