@@ -41,7 +41,7 @@ int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realS
     // Loop through every row in matrix
     for (currentLead = 0; currentLead < realSize; currentLead++)
     {
-        //printf("...labels[currentLead]: %s\n", labels[currentLead]);
+        printf("...labels[currentLead]: %s\n", labels[currentLead]);
         // IF it hasn't been flagged yet, compare it to all the others
         if ((currentLead == 0) || (flags[currentLead] == 0))
         {
@@ -51,11 +51,11 @@ int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realS
                 {
                     total = 0;
                     compare_rows(matrix[currentLead], matrix[i], realSize, &total);
-                    //printf("Comparing %s to %s ---> Total: %f\n", labels[i], labels[currentLead], total);
+                    printf("Comparing %s to %s ---> Total: %f\n", labels[i], labels[currentLead], total);
 
                     if (total < ALPHA)
                     {
-                        //printf("       Adding %s to the %s group.\n", labels[i], labels[currentLead]);
+                        printf("       Adding %s to the %s group.\n", labels[i], labels[currentLead]);
                         // Flag this row!
                         flags[i] = 1;
                         // Add the LEADER'S label to the epsilon table
@@ -137,7 +137,7 @@ int reduce_noise(int realSize, double ***ptrToMatrix)
 {
     double **matrix = *ptrToMatrix;
     int i, j;
-    double matrixSum = 0;
+    int matrixSum = 0;
     for (i = 0; i < realSize; i++)
     {
         for (j = 0; j < realSize; j++)
@@ -147,7 +147,7 @@ int reduce_noise(int realSize, double ***ptrToMatrix)
     }
 
     //matrixSum = 146;
-    printf("Matrix Sum = %f\n", matrixSum);
+    printf("Matrix Sum = %d\n", matrixSum);
 
     for (i = 0; i < realSize; i++)
     {
