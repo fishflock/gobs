@@ -2,6 +2,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 import random
+import sys
 
 def colors():
     return ['red',
@@ -12,8 +13,8 @@ def colors():
             'c',
             ]     
 
-def read_ep_matrix():
-    ep_in = open('output.txt')
+def read_ep_matrix(input):
+    ep_in = open(input)
 
     #labels for the epsilon state transition matrix
     labels = []
@@ -143,12 +144,14 @@ def face():
             i = i + 1
 
     graph(G)
-            
-#main function, reads input from output of GOBS
 
+
+################################################################  
+#main function, reads input from output of GOBS
+input = sys.argv[1]
 
 #read in values from epsilon state matrix, separate into labels and data
-ep_arr = read_ep_matrix()
+ep_arr = read_ep_matrix(input)
 labels = ep_arr[0]
 values = np.array(ep_arr[1])
 
@@ -164,4 +167,4 @@ for l in labels:
 G = nx.relabel_nodes(G,mapping)
 
 graph(G)
-    
+################################################################  
