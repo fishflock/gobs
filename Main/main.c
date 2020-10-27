@@ -17,7 +17,7 @@ int BUFF_SIZE = 128;
 int MAX_SIZE = 816;
 char *DEF_INPUT_FILE = "sample";
 char *DEF_OUTPUT_FILE = "compressvector2";
-//char *DEF_INPUT_FILEPATH = "Main/input/";
+char *DEF_INPUT_FILEPATH = "Main/input/";
 char *DEF_OUTPUT_FILEPATH = "output/";
 double ALPHA = 1.0;
 
@@ -32,43 +32,12 @@ int main(int argc, char *argv[])
     FILE *input_file;
     FILE *output_file;
     char *filename = (char *)malloc(BUFF_SIZE);
-    char *filepath = (char *)malloc(BUFF_SIZE);
 
     char buffer[BUFF_SIZE];
     struct stat st = {0};
 
     // Open input file
-    int length = strlen(argv[1]);
-    char *ptrToPath = argv[1];
-    char *ptrToFileName = strrchr(argv[1], '/');
-    if (ptrToFileName == NULL)
-    {
-        ptrToFileName = argv[1];
-        ptrToFileName--;
-    }
-    //printf("ptrToFileName: %d\n", (int)ptrToFileName);
-    //printf("ptrToPath: %d\n", (int)ptrToPath);
-    int index = (int)(ptrToFileName - ptrToPath);
-    //printf("index: %d\n", index);
-    //printf("length: %d\n", length);
-    int count = 0;
-    for (int s = 0; s <= index; s++)
-    {
-        //printf("%c", *ptrToPath);
-        filepath[count] = *ptrToPath;
-        ptrToPath++;
-        count++;
-    }
-    printf("\nfilepath: %s\n", filepath);
-    count = 0;
-    for (int t = index; t < length; t++)
-    {
-        ptrToFileName++;
-        //printf("%c", *ptrToFileName);
-        filename[count] = *ptrToFileName;
-        count++;
-    }
-    printf("\nfilename: %s\n\n", filename);
+    strcpy(filename, argv[1]);
 
     int normalize;
     if (argv[2] == NULL)
@@ -86,10 +55,10 @@ int main(int argc, char *argv[])
     }
     else
     {
-        reduceNoiseFlag = atoi(argv[3]);
+        reduceNoiseFlag = atoi(argv[2]);
     }
 
-    length = strlen(filename);
+    int length = strlen(filename);
     if ((length >= 5) &&
         (strcmp(&filename[length - 4], ".csv") == 0))
     {
@@ -101,14 +70,13 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    strcpy(buffer, filepath);
+    strcpy(buffer, DEF_INPUT_FILEPATH);
     if (stat(buffer, &st) == -1)
     {
         perror("stat");
         exit(EXIT_FAILURE);
     }
     strcat(buffer, filename);
-    //printf("BUFFER---> %s\n", buffer);
     if ((input_file = fopen(buffer, "r")) == NULL)
     {
         perror("fopen");
@@ -149,18 +117,17 @@ int main(int argc, char *argv[])
     // Create c matrix
     int numVecsRecorded;
     int sizeOfCMatrix = create_c_matrix(dir, &labels, &matrix, input_file, &numVecsRecorded);
+    if (normalize)
+    {
+        int normalize = normalize_c_matrix(sizeOfCMatrix, &matrix, numVecsRecorded, 5);
+    }
     printf("C matrix is %dx%d\n", sizeOfCMatrix, sizeOfCMatrix);
     printf("Number of unqiue vectors (size of labels array) %d\n", sizeOfCMatrix);
+
     if (debug)
     {
         int printCMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
         int printLabels = print_labels(sizeOfCMatrix, &labels);
-    }
-    if (normalize)
-    {
-        int normalize = normalize_c_matrix(sizeOfCMatrix, &matrix, numVecsRecorded, 5);
-        printf("C Matrix Normalized by Number of Vectors: \n");
-        int normalizedMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
     }
 
     // Create the epsilon lookup table
@@ -208,7 +175,6 @@ int main(int argc, char *argv[])
     if (reduceNoiseFlag)
     {
         reduce_noise(sizeOfCMatrix, &matrix);
-        printf("C Matrix with Reduced Noise: \n");
         int reducedMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
     }
 
@@ -279,7 +245,7 @@ int print_c_matrix(int sizeOfCMatrix, char ***ptrToLabels, double ***ptrToMatrix
 {
     char **labels = *ptrToLabels;
     double **matrix = *ptrToMatrix;
-    printf("Co-occurrence Matrix: \n");
+    printf("\n\nCo-occurrence Matrix: \n");
     for (int i = 0; i < sizeOfCMatrix; i++)
     {
         printf("%s ", labels[i]);
