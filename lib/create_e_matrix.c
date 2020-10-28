@@ -21,7 +21,7 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
     char next[5];
 
     read_uncompressed_vectors(vector, dir + 1, input_file);
-   
+
     for (i = 0; i < dir; i++)
     {
         cvec[i] = 0;
@@ -97,34 +97,57 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
 
         strcpy(current, next);
     }
-    
 
+    // Loop through the lookupTable and find all the unique labels
+    // Save them in an array of strings called uniqueLabels
+    char **uniqueLabels = malloc(numRows * sizeof(char *));
+    int uniqueLabelsCount = 0;
+    char currentEpsilon[5];
+    strcpy(currentEpsilon, lookupTable[0].epsilon);
+    for (int k = 0; k < sizeofLookupTable; k++)
+    {
+        if ((k == 0) || (strcmp(currentEpsilon, lookupTable[k].epsilon) != 0))
+        {
+            uniqueLabels[uniqueLabelsCount] = malloc(5 * sizeof(char));
+            strcpy(uniqueLabels[uniqueLabelsCount], lookupTable[k].epsilon);
+            strcpy(currentEpsilon, lookupTable[k].epsilon);
+            uniqueLabelsCount++;
+        }
+    }
     // Write eMat to output file
-
     //Displaying array elements
     int row, col, top;
     fprintf(output_file, "Epsilon matrix:\n");
-    fprintf(output_file, "      ");
+    fprintf(output_file, "            ");
     for (top = 0; top < numRows; top++)
     {
-        fprintf(output_file, "%s ", lookupTable[top].epsilon);
+        fprintf(output_file, "%12s", uniqueLabels[top]);
         if (top == numRows - 1)
         {
             fprintf(output_file, "\n");
         }
     }
+
     for (row = 0; row < numRows; row++)
     {
-        fprintf(output_file, "%s ", lookupTable[row].epsilon);
+        fprintf(output_file, "%12s", uniqueLabels[row]);
         for (col = 0; col < numRows; col++)
         {
-            fprintf(output_file, "  %d   ", eMat[row][col]);
+            fprintf(output_file, "%12d", eMat[row][col]);
             if (col == numRows - 1)
             {
                 fprintf(output_file, "\n");
             }
         }
     }
+
+    // Free the array that's holding the unique labels
+    for (int m = 0; m < numRows; m++)
+    {
+        free(uniqueLabels[m]);
+    }
+    free(uniqueLabels);
+
     fclose(output_file);
     return 1;
 }
