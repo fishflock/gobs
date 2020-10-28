@@ -15,9 +15,9 @@
 
 int BUFF_SIZE = 128;
 int MAX_SIZE = 816;
-char *DEF_INPUT_FILE = "sample";
-char *DEF_OUTPUT_FILE = "compressvector2";
-//char *DEF_INPUT_FILEPATH = "Main/input/";
+//char *DEF_INPUT_FILE = "sample";
+//char *DEF_OUTPUT_FILE = "compressvector2";
+char *DEF_INPUT_FILEPATH = "Main/input/";
 char *DEF_OUTPUT_FILEPATH = "output/";
 double ALPHA = 1.0;
 
@@ -29,91 +29,63 @@ int print_e_lookup(struct luRow **ptrToLookupTable, int realSize, char ***ptrToL
 
 int main(int argc, char *argv[])
 {
-    FILE *input_file;
-    FILE *output_file;
-    char *filename = (char *)malloc(BUFF_SIZE);
-    char *filepath = (char *)malloc(BUFF_SIZE);
+    //--------------- Varify input and output files ---------------
+    FILE *input, *output;
+    char *input_file = (char *)malloc(BUFF_SIZE);
+    char *output_file = (char *)malloc(BUFF_SIZE);
+    input_file = argv[1];
+    output_file = argv[2];
 
-    char buffer[BUFF_SIZE];
-    struct stat st = {0};
+    //Check it input is .csv
+    if (strcmp(&input_file[strlen(input_file) - 4], ".csv") == 0)
+    {
+        printf("Importing data from %s...\n", input_file);
+    } else {
+        printf("%s is an invalid file. Input must be a .csv file. Exiting program...\n", input_file);
+        exit(1);
+    }
+    //Check if output is .txt
+    if (strcmp(&output_file[strlen(output_file) - 4], ".txt") != 0)
+    {
+        printf("%s is an invalid file. output must be a .txt file. Exiting program...\n", output_file);
+        exit(1);
+    } 
+    //Check that output file does not exist
+    if( access(output_file, F_OK) != -1 ) {
+        printf("%s already exists. Please choose a different output name. Exiting program...\n", output_file);
+        exit(1);
+    }else{
+        output= fopen(output_file, "w");
+    }
+    //Check that input does exist
+    if ((input= fopen(input_file, "r")) == NULL)
+    {
+        perror("fopen");
+        exit(EXIT_FAILURE);
+    }
 
-    // Open input file
-    int length = strlen(argv[1]);
-    char *ptrToPath = argv[1];
-    char *ptrToFileName = strrchr(argv[1], '/');
-    if (ptrToFileName == NULL)
-    {
-        ptrToFileName = argv[1];
-        ptrToFileName--;
-    }
-    //printf("ptrToFileName: %d\n", (int)ptrToFileName);
-    //printf("ptrToPath: %d\n", (int)ptrToPath);
-    int index = (int)(ptrToFileName - ptrToPath);
-    //printf("index: %d\n", index);
-    //printf("length: %d\n", length);
-    int count = 0;
-    for (int s = 0; s <= index; s++)
-    {
-        //printf("%c", *ptrToPath);
-        filepath[count] = *ptrToPath;
-        ptrToPath++;
-        count++;
-    }
-    printf("\nfilepath: %s\n", filepath);
-    count = 0;
-    for (int t = index; t < length; t++)
-    {
-        ptrToFileName++;
-        //printf("%c", *ptrToFileName);
-        filename[count] = *ptrToFileName;
-        count++;
-    }
-    printf("\nfilename: %s\n\n", filename);
-
+    //--------- Check normalize and reduceNoiseFlag parameters ---------
     int normalize;
-    if (argv[2] == NULL)
+    if (argv[3] == NULL)
     {
         normalize = 0;
     }
     else
     {
-        normalize = atoi(argv[2]);
+        normalize = atoi(argv[3]);
     }
+
     int reduceNoiseFlag;
-    if (argv[3] == NULL)
+    if (argv[4] == NULL)
     {
         reduceNoiseFlag = 0;
     }
     else
     {
-        reduceNoiseFlag = atoi(argv[3]);
+        reduceNoiseFlag = atoi(argv[4]);
     }
+    //-------------------------------------------------------------------
 
-    length = strlen(filename);
-    if ((length >= 5) &&
-        (strcmp(&filename[length - 4], ".csv") == 0))
-    {
-        printf("Importing data from %s...\n", filename);
-    }
-    else
-    {
-        printf("%s is an invalid file. Exiting program...\n", filename);
-        exit(1);
-    }
-
-    strcpy(buffer, filepath);
-    if (stat(buffer, &st) == -1)
-    {
-        perror("stat");
-        exit(EXIT_FAILURE);
-    }
-    strcat(buffer, filename);
-    //printf("BUFFER---> %s\n", buffer);
-    if ((input_file = fopen(buffer, "r")) == NULL)
-    {
-        perror("fopen");
-        exit(EXIT_FAILURE);
-    }
 
     // Set past/future raw vector length to 5
     int hist = 5;
@@ -148,7 +120,7 @@ int main(int argc, char *argv[])
 
     // Create c matrix
     int numVecsRecorded;
-    int sizeOfCMatrix = create_c_matrix(dir, &labels, &matrix, input_file, &numVecsRecorded);
+    int sizeOfCMatrix = create_c_matrix(dir, &labels, &matrix, input, &numVecsRecorded);
     printf("C matrix is %dx%d\n", sizeOfCMatrix, sizeOfCMatrix);
     printf("Number of unqiue vectors (size of labels array) %d\n", sizeOfCMatrix);
     if (debug)
@@ -204,14 +176,13 @@ int main(int argc, char *argv[])
 
     // double total = 0;
     // compare_rows(cenekTest[0], cenekTest[1], sizeOfCMatrix, &total);
-
     if (reduceNoiseFlag)
     {
         reduce_noise(sizeOfCMatrix, &matrix);
         printf("C Matrix with Reduced Noise: \n");
         int reducedMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
     }
-
+    
     // Return # of group leaders ???
     int sizeOfEMatrix = create_e_table(&lookupTable, dir, sizeOfCMatrix, &matrix, &labels, ALPHA);
     printf("E matrix is %dx%d\n", sizeOfEMatrix, sizeOfEMatrix);
@@ -219,10 +190,11 @@ int main(int argc, char *argv[])
     {
         int printEMat = print_e_lookup(&lookupTable, sizeOfCMatrix, &labels);
     }
-
+   
     // INITIALIZE MATRIX AS A 2D INT ARRAY WITH DIMENSIONS: sizeOfEMatrix*sizeOfEMatrix
     int **eMat = NULL;
     eMat = (int **)malloc(sizeof(int *) * sizeOfEMatrix);
+    
     for (i = 0; i < sizeOfEMatrix; i++)
     {
         eMat[i] = (int *)malloc(sizeOfEMatrix);
@@ -233,10 +205,10 @@ int main(int argc, char *argv[])
             eMat[i][j] = 0;
     }
 
-    int done = create_e_matrix(&lookupTable, sizeOfCMatrix, sizeOfEMatrix, &eMat, input_file, output_file);
+    int done = create_e_matrix(&lookupTable, sizeOfCMatrix, sizeOfEMatrix, &eMat, input, output);
 
-    fclose(input_file);
-    fclose(output_file);
+    fclose(input);
+    fclose(output);
 
     if (labels != NULL)
     {
