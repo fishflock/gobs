@@ -21,6 +21,7 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
     char next[5];
 
     read_uncompressed_vectors(vector, dir + 1, input_file);
+   
     for (i = 0; i < dir; i++)
     {
         cvec[i] = 0;
@@ -96,14 +97,9 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
 
         strcpy(current, next);
     }
+    
 
     // Write eMat to output file
-    // Open output file
-    int temp_buff_size = 128;
-    char filename[temp_buff_size];
-    strcpy(filename, "output");
-    strcat(filename, ".txt");
-    output_file = fopen(filename, "w");
 
     //Displaying array elements
     int row, col, top;
