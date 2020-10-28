@@ -13,8 +13,8 @@ def colors():
             'c',
             ]     
 
-def read_ep_matrix(input):
-    ep_in = open(input)
+def read_ep_matrix(gobs_in):
+    ep_in = open(gobs_in)
 
     #labels for the epsilon state transition matrix
     labels = []
@@ -121,8 +121,8 @@ def graph(G):
                 arrowsize=1
                 )
         i = i + 1
-
-    plt.show()
+    output = 'out.png'
+    plt.savefig(output)
 
 #function for testing with Facebook data
 def face():
@@ -148,10 +148,10 @@ def face():
 
 ################################################################  
 #main function, reads input from output of GOBS
-input = sys.argv[1]
+gobs_in = sys.argv[1]
 
 #read in values from epsilon state matrix, separate into labels and data
-ep_arr = read_ep_matrix(input)
+ep_arr = read_ep_matrix(gobs_in)
 labels = ep_arr[0]
 values = np.array(ep_arr[1])
 
