@@ -19,7 +19,7 @@ int MAX_SIZE = 816;
 //char *DEF_OUTPUT_FILE = "compressvector2";
 char *DEF_INPUT_FILEPATH = "Main/input/";
 char *DEF_OUTPUT_FILEPATH = "output/";
-double ALPHA = 1.0;
+double ALPHA = 0.0;
 
 int debug = 1;
 
@@ -40,7 +40,9 @@ int main(int argc, char *argv[])
     if (strcmp(&input_file[strlen(input_file) - 4], ".csv") == 0)
     {
         printf("Importing data from %s...\n", input_file);
-    } else {
+    }
+    else
+    {
         printf("%s is an invalid file. Input must be a .csv file. Exiting program...\n", input_file);
         exit(1);
     }
@@ -49,16 +51,13 @@ int main(int argc, char *argv[])
     {
         printf("%s is an invalid file. output must be a .txt file. Exiting program...\n", output_file);
         exit(1);
-    } 
-    //Check that output file does not exist
-    if( access(output_file, F_OK) != -1 ) {
-        printf("%s already exists. Please choose a different output name. Exiting program...\n", output_file);
-        exit(1);
-    }else{
-        output= fopen(output_file, "w");
+    }
+    else
+    {
+        output = fopen(output_file, "w");
     }
     //Check that input does exist
-    if ((input= fopen(input_file, "r")) == NULL)
+    if ((input = fopen(input_file, "r")) == NULL)
     {
         perror("fopen");
         exit(EXIT_FAILURE);
@@ -84,8 +83,10 @@ int main(int argc, char *argv[])
     {
         reduceNoiseFlag = atoi(argv[4]);
     }
-    //-------------------------------------------------------------------
 
+    ALPHA = atof(argv[5]);
+
+    //-------------------------------------------------------------------
 
     // Set past/future raw vector length to 5
     int hist = 5;
@@ -182,7 +183,7 @@ int main(int argc, char *argv[])
         printf("C Matrix with Reduced Noise: \n");
         int reducedMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
     }
-    
+
     // Return # of group leaders ???
     int sizeOfEMatrix = create_e_table(&lookupTable, dir, sizeOfCMatrix, &matrix, &labels, ALPHA);
     printf("E matrix is %dx%d\n", sizeOfEMatrix, sizeOfEMatrix);
@@ -190,11 +191,11 @@ int main(int argc, char *argv[])
     {
         int printEMat = print_e_lookup(&lookupTable, sizeOfCMatrix, &labels);
     }
-   
+
     // INITIALIZE MATRIX AS A 2D INT ARRAY WITH DIMENSIONS: sizeOfEMatrix*sizeOfEMatrix
     int **eMat = NULL;
     eMat = (int **)malloc(sizeof(int *) * sizeOfEMatrix);
-    
+
     for (i = 0; i < sizeOfEMatrix; i++)
     {
         eMat[i] = (int *)malloc(sizeOfEMatrix);
