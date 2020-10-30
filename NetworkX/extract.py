@@ -39,6 +39,7 @@ def read_ep_matrix(gobs_in):
 def graph(G, nx_out):
 
     node_arr = [] #stores nodes with total weight < 1
+    max_weight = 0
 
     #iterates through each node and compares it to each other node (including itself)
     #calculates in, out, and total weights
@@ -54,6 +55,9 @@ def graph(G, nx_out):
                 out_weight = out_weight + G[g2][g1][0]["weight"]
 
         total_weight = in_weight + out_weight
+
+        if total_weight > max_weight:
+            max_weight = total_weight
         
         if total_weight > 0:
             G.nodes[g1]['weight'] = total_weight
@@ -82,6 +86,8 @@ def graph(G, nx_out):
     #returns an array of the first 6 colors used in graph
     color_arr = colors()
 
+    scale = 15000/max_weight
+
     #draw the graph
     i = 0
     for g in groups:
@@ -93,12 +99,12 @@ def graph(G, nx_out):
         else:
             c = color_arr[i]
         for n in g:
-            s_arr.append(300 * G.nodes[n]['weight'])
+            s_arr.append(scale * G.nodes[n]['weight'])
             for e in G.edges(n):
                 if(e[0] == e[1]):
                     w = G.nodes[e[0]]['weight']
                 edge_list_arr.append(e)
-                edge_size_arr.append(G[e[0]][e[1]][0]['weight'])   
+                edge_size_arr.append((scale * G[e[0]][e[1]][0]['weight'])/300)   
 
         #draw the nodes
         nx.draw_networkx(G,
