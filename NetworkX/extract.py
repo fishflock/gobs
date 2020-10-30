@@ -36,7 +36,7 @@ def read_ep_matrix(gobs_in):
         i = i + 1
     return [labels, values]
 
-def graph(G):
+def graph(G, nx_out):
 
     node_arr = [] #stores nodes with total weight < 1
 
@@ -121,8 +121,7 @@ def graph(G):
                 arrowsize=1
                 )
         i = i + 1
-    output = 'out.png'
-    plt.savefig(output)
+    plt.savefig(nx_out)
 
 #function for testing with Facebook data
 def face():
@@ -147,8 +146,9 @@ def face():
 
 
 ################################################################  
-#main function, reads input from output of GOBS
+#main function, reads input from output of GOBS, outputs networkx as .png
 gobs_in = sys.argv[1]
+nx_out = sys.argv[2]
 
 #read in values from epsilon state matrix, separate into labels and data
 ep_arr = read_ep_matrix(gobs_in)
@@ -166,5 +166,5 @@ for l in labels:
     i = i + 1
 G = nx.relabel_nodes(G,mapping)
 
-graph(G)
+graph(G, nx_out)
 ################################################################  
