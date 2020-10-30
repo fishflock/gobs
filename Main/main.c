@@ -31,8 +31,8 @@ int main(int argc, char *argv[])
 {
     //--------------- Varify input and output files ---------------
     FILE *input, *output;
-    char *input_file = (char *)malloc(BUFF_SIZE);
-    char *output_file = (char *)malloc(BUFF_SIZE);
+    char *input_file = (char *)malloc(sizeof(char)*BUFF_SIZE);
+    char *output_file = (char *)malloc(sizeof(char)*BUFF_SIZE);
     input_file = argv[1];
     output_file = argv[2];
 
