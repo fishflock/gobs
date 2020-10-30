@@ -31,8 +31,8 @@ int main(int argc, char *argv[])
 {
     //--------------- Varify input and output files ---------------
     FILE *input, *output;
-    char *input_file = (char *)malloc(BUFF_SIZE);
-    char *output_file = (char *)malloc(BUFF_SIZE);
+    char *input_file = (char *)malloc(sizeof(char)*BUFF_SIZE);
+    char *output_file = (char *)malloc(sizeof(char)*BUFF_SIZE);
     input_file = argv[1];
     output_file = argv[2];
 
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     labels = (char **)malloc(sizeof(char *) * MAX_SIZE);
     for (i = 0; i < MAX_SIZE; i++)
     {
-        labels[i] = (char *)malloc(dir + 1);
+        labels[i] = (char *)malloc(sizeof(char)*dir + 1);
     }
     for (i = 0; i < dir; i++)
     {
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
     matrix = (double **)malloc(sizeof(double *) * MAX_SIZE);
     for (i = 0; i < MAX_SIZE; i++)
     {
-        matrix[i] = (double *)malloc(MAX_SIZE);
+        matrix[i] = (double *)malloc(sizeof(double)*MAX_SIZE);
     }
     for (int i = 0; i < MAX_SIZE; i++)
     {
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
 
     for (i = 0; i < sizeOfEMatrix; i++)
     {
-        eMat[i] = (int *)malloc(sizeOfEMatrix);
+        eMat[i] = (int *)malloc(sizeof(int)*sizeOfEMatrix);
     }
     for (int i = 0; i < sizeOfEMatrix; i++)
     {
