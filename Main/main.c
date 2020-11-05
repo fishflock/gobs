@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     }
 
     //--------- Check normalize and reduceNoiseFlag parameters ---------
-    if (argv[3] == NULL)
+    if (argv[3] != NULL)
     {
         NORMALIZE_FLAG = atoi(argv[3]);
         printf("Setting NORMALIZE_FLAG to: %d\n", NORMALIZE_FLAG);
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
         VEC_HIST_LEN = atoi(argv[5]);
         printf("Setting VEC_HIST_LEN to: %d\n", VEC_HIST_LEN);
     }
-    if (argv[6] == NULL)
+    if (argv[6] != NULL)
     {
         NUM_DIRECTIONS = atoi(argv[6]);
         printf("Setting NUM_DIRECTIONS to: %d\n", NUM_DIRECTIONS);
