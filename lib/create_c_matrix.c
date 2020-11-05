@@ -21,7 +21,6 @@ int create_c_matrix(int dir, int hist,
     *numVecsRecorded = 0;
     while (read_c_vectors(past, future, hist, dir, file) != -1)
     {
-        printf("  Past: %s // Future: %s\n", past, future);
         int past_pos = -1;
         for (int i = 0; i < last_label_pos + 1; i++)
         {
