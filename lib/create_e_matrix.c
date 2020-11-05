@@ -4,23 +4,22 @@
 #include "read_c_vectors.h"
 #include "create_e_matrix.h"
 
-int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int numRows, int ***ptrToEMat, FILE *input_file, FILE *output_file)
+int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int numRows, int ***ptrToEMat, FILE *input_file, FILE *output_file, int dir, int hist)
 {
     struct luRow *lookupTable = *ptrToLookupTable;
     int **eMat = *ptrToEMat;
 
     int i;
-    int dir = 4;
     int currentPos = -1;
     int nextPos = -1;
 
-    char vector[6];
-    int cvec[4];
-    char cvecAsString[5];
-    char current[5];
-    char next[5];
+    char vector[hist + 1];
+    int cvec[dir];
+    char cvecAsString[dir + 1];
+    char current[dir + 1];
+    char next[dir + 1];
 
-    read_uncompressed_vectors(vector, dir + 1, input_file);
+    read_uncompressed_vectors(vector, hist, input_file);
 
     for (i = 0; i < dir; i++)
     {
@@ -28,7 +27,7 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
     }
     //printf("%s -> ", vector);
     // Get compressed vec
-    for (i = 0; i < dir + 1; i++)
+    for (i = 0; i < hist; i++)
     {
         int val = vector[i] - '0';
         cvec[val - 1] += 1;
@@ -42,7 +41,7 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
         current[i] = cvec[i] + '0';
     current[dir] = '\0';
 
-    while (read_uncompressed_vectors(vector, dir + 1, input_file) != -1)
+    while (read_uncompressed_vectors(vector, hist, input_file) != -1)
     {
         for (i = 0; i < dir; i++)
         {
@@ -50,7 +49,7 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
         }
         //printf("%s -> ", vector);
         // Get compressed vec
-        for (i = 0; i < dir + 1; i++)
+        for (i = 0; i < hist; i++)
         {
             int val = vector[i] - '0';
             cvec[val - 1] += 1;
@@ -102,13 +101,13 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
     // Save them in an array of strings called uniqueLabels
     char **uniqueLabels = malloc(numRows * sizeof(char *));
     int uniqueLabelsCount = 0;
-    char currentEpsilon[5];
+    char currentEpsilon[dir + 1];
     strcpy(currentEpsilon, lookupTable[0].epsilon);
     for (int k = 0; k < sizeofLookupTable; k++)
     {
         if ((k == 0) || (strcmp(currentEpsilon, lookupTable[k].epsilon) != 0))
         {
-            uniqueLabels[uniqueLabelsCount] = malloc(5 * sizeof(char));
+            uniqueLabels[uniqueLabelsCount] = malloc((dir + 1) * sizeof(char));
             strcpy(uniqueLabels[uniqueLabelsCount], lookupTable[k].epsilon);
             strcpy(currentEpsilon, lookupTable[k].epsilon);
             uniqueLabelsCount++;

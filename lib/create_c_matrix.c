@@ -6,7 +6,7 @@
 
 // Note: expects 2D array for both labels and matrix.
 // Must be uninitialized
-int create_c_matrix(int dir,
+int create_c_matrix(int dir, int hist,
                     char ***ptrToLabels,
                     double ***ptrToMatrix,
                     FILE *file, int *numVecsRecorded)
@@ -19,7 +19,7 @@ int create_c_matrix(int dir,
     int last_label_pos = 0;
     int i;
     *numVecsRecorded = 0;
-    while (read_cvec(past, future, file) != -1)
+    while (read_c_vectors(past, future, hist, dir, file) != -1)
     {
         int past_pos = -1;
         for (int i = 0; i < last_label_pos + 1; i++)

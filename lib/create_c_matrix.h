@@ -2,9 +2,10 @@
 #define CREATE_C_MATRIX_H
 #include <stdio.h>
 
-int create_c_matrix(int dir,
+int create_c_matrix(int dir, int hist,
                     char ***ptrToLabels,
-                    double ***ptrToMatrix, FILE *file, int *numVecsRecorded);
+                    double ***ptrToMatrix,
+                    FILE *file, int *numVecsRecorded);
 
 int normalize_c_matrix(int realSize,
                        double ***ptrToMatrix,

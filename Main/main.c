@@ -15,11 +15,11 @@
 
 int BUFF_SIZE = 128;
 int MAX_SIZE = 816;
-//char *DEF_INPUT_FILE = "sample";
-//char *DEF_OUTPUT_FILE = "compressvector2";
-char *DEF_INPUT_FILEPATH = "Main/input/";
-char *DEF_OUTPUT_FILEPATH = "output/";
+
+int NORMALIZE_FLAG = 0;
 double ALPHA = 0.0;
+int VEC_HIST_LEN = 5;
+int NUM_DIRECTIONS = 4;
 
 int debug = 1;
 
@@ -31,8 +31,8 @@ int main(int argc, char *argv[])
 {
     //--------------- Varify input and output files ---------------
     FILE *input, *output;
-    char *input_file = (char *)malloc(sizeof(char)*BUFF_SIZE);
-    char *output_file = (char *)malloc(sizeof(char)*BUFF_SIZE);
+    char *input_file = (char *)malloc(BUFF_SIZE);
+    char *output_file = (char *)malloc(BUFF_SIZE);
     input_file = argv[1];
     output_file = argv[2];
 
@@ -64,46 +64,45 @@ int main(int argc, char *argv[])
     }
 
     //--------- Check normalize and reduceNoiseFlag parameters ---------
-    int normalize;
-    if (argv[3] == NULL)
+    if (argv[3] != NULL)
     {
-        normalize = 0;
+        NORMALIZE_FLAG = atoi(argv[3]);
+        printf("Setting NORMALIZE_FLAG to: %d\n", NORMALIZE_FLAG);
     }
-    else
+    if (argv[4] != NULL)
     {
-        normalize = atoi(argv[3]);
+        ALPHA = atof(argv[4]);
+        printf("Setting ALPHA to: %f\n", ALPHA);
     }
-
-    int reduceNoiseFlag;
-    if (argv[4] == NULL)
+    if (argv[5] != NULL)
     {
-        reduceNoiseFlag = 0;
+        VEC_HIST_LEN = atoi(argv[5]);
+        printf("Setting VEC_HIST_LEN to: %d\n", VEC_HIST_LEN);
     }
-    else
+    if (argv[6] != NULL)
     {
-        reduceNoiseFlag = atoi(argv[4]);
+        NUM_DIRECTIONS = atoi(argv[6]);
+        printf("Setting NUM_DIRECTIONS to: %d\n", NUM_DIRECTIONS);
     }
-
-    ALPHA = atof(argv[5]);
 
     //-------------------------------------------------------------------
 
-    // Set past/future raw vector length to 5
-    int hist = 5;
-    // Set number of directions to 4 (compressed vec length=4)
-    int dir = 4;
-
     int i;
-    // INITIALIZE LABELS AS A 2D CHAR ARRAY WITH DIMENSIONS: MAX_SIZE*5
+    // Create a string initialized to X zeros; where X is the number of directions specified
+    // (Set the last character to the string terminator character)
+    char initializeToZeros[NUM_DIRECTIONS + 1];
+    for (i = 0; i < NUM_DIRECTIONS; i++)
+    {
+        initializeToZeros[i] = '0';
+    }
+    initializeToZeros[NUM_DIRECTIONS] = '\0';
+    // INITIALIZE LABELS AS A 2D CHAR ARRAY WITH DIMENSIONS: MAX_SIZE*(NUM_DIRECTIONS + 1)
     char **labels = NULL;
     labels = (char **)malloc(sizeof(char *) * MAX_SIZE);
     for (i = 0; i < MAX_SIZE; i++)
     {
-        labels[i] = (char *)malloc(sizeof(char)*dir + 1);
-    }
-    for (i = 0; i < dir; i++)
-    {
-        strcpy(labels[i], "0000");
+        labels[i] = (char *)malloc(sizeof(char) * NUM_DIRECTIONS + 1);
+        strcpy(labels[i], initializeToZeros);
     }
 
     // INITIALIZE MATRIX AS A 2D INT ARRAY WITH DIMENSIONS: MAX_SIZE*MAX_SIZE
@@ -111,7 +110,7 @@ int main(int argc, char *argv[])
     matrix = (double **)malloc(sizeof(double *) * MAX_SIZE);
     for (i = 0; i < MAX_SIZE; i++)
     {
-        matrix[i] = (double *)malloc(sizeof(double)*MAX_SIZE);
+        matrix[i] = (double *)malloc(sizeof(double) * MAX_SIZE);
     }
     for (int i = 0; i < MAX_SIZE; i++)
     {
@@ -121,7 +120,7 @@ int main(int argc, char *argv[])
 
     // Create c matrix
     int numVecsRecorded;
-    int sizeOfCMatrix = create_c_matrix(dir, &labels, &matrix, input, &numVecsRecorded);
+    int sizeOfCMatrix = create_c_matrix(NUM_DIRECTIONS, VEC_HIST_LEN, &labels, &matrix, input, &numVecsRecorded);
     printf("C matrix is %dx%d\n", sizeOfCMatrix, sizeOfCMatrix);
     printf("Number of unqiue vectors (size of labels array) %d\n", sizeOfCMatrix);
     if (debug)
@@ -129,9 +128,9 @@ int main(int argc, char *argv[])
         int printCMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
         int printLabels = print_labels(sizeOfCMatrix, &labels);
     }
-    if (normalize)
+    if (NORMALIZE_FLAG)
     {
-        int normalize = normalize_c_matrix(sizeOfCMatrix, &matrix, numVecsRecorded, 5);
+        int normalize = normalize_c_matrix(sizeOfCMatrix, &matrix, numVecsRecorded, VEC_HIST_LEN);
         printf("C Matrix Normalized by Number of Vectors: \n");
         int normalizedMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
     }
@@ -140,52 +139,14 @@ int main(int argc, char *argv[])
     //struct luRow lookupTable[100];
     struct luRow *lookupTable = (struct luRow *)malloc(sizeof(struct luRow) * MAX_SIZE);
 
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // for (int i = 0; i < MAX_SIZE; i++)
-    // {
-    //     for (int j = 0; j < MAX_SIZE; j++)
-    //         matrix[i][j] = 0;
-    // }
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // double **cenekTest = NULL;
-    // cenekTest = (double **)malloc(sizeof(double *) * 2);
-    // for (i = 0; i < 8; i++)
-    // {
-    //     cenekTest[i] = (double *)malloc(sizeof(double) * 8);
-    // }
-    // cenekTest[0][0] = 0;
-    // cenekTest[0][1] = 1;
-    // cenekTest[0][2] = 3;
-    // cenekTest[0][3] = 1;
-    // cenekTest[0][4] = 4;
-    // cenekTest[0][5] = 1;
-    // cenekTest[0][6] = 1;
-    // cenekTest[0][7] = 3;
-
-    // cenekTest[1][0] = 0;
-    // cenekTest[1][1] = 1;
-    // cenekTest[1][2] = 2;
-    // cenekTest[1][3] = 1;
-    // cenekTest[1][4] = 4;
-    // cenekTest[1][5] = 1;
-    // cenekTest[1][6] = 1;
-    // cenekTest[1][7] = 2;
-
-    // //sizeOfCMatrix = 8;
-    // reduce_noise(sizeOfCMatrix, &cenekTest);
-
-    // double total = 0;
-    // compare_rows(cenekTest[0], cenekTest[1], sizeOfCMatrix, &total);
-    if (reduceNoiseFlag)
+    for (i = 0; i < MAX_SIZE; i++)
     {
-        reduce_noise(sizeOfCMatrix, &matrix);
-        printf("C Matrix with Reduced Noise: \n");
-        int reducedMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
+        lookupTable[i].epsilon = (char *)malloc(sizeof(char) * (NUM_DIRECTIONS + 1));
+        lookupTable[i].vector = (char *)malloc(sizeof(char) * (NUM_DIRECTIONS + 1));
     }
 
     // Return # of group leaders ???
-    int sizeOfEMatrix = create_e_table(&lookupTable, dir, sizeOfCMatrix, &matrix, &labels, ALPHA);
+    int sizeOfEMatrix = create_e_table(&lookupTable, NUM_DIRECTIONS, sizeOfCMatrix, &matrix, &labels, ALPHA);
     printf("E matrix is %dx%d\n", sizeOfEMatrix, sizeOfEMatrix);
     if (debug)
     {
@@ -198,7 +159,7 @@ int main(int argc, char *argv[])
 
     for (i = 0; i < sizeOfEMatrix; i++)
     {
-        eMat[i] = (int *)malloc(sizeof(int)*sizeOfEMatrix);
+        eMat[i] = (int *)malloc(sizeof(int) * sizeOfEMatrix);
     }
     for (int i = 0; i < sizeOfEMatrix; i++)
     {
@@ -206,7 +167,7 @@ int main(int argc, char *argv[])
             eMat[i][j] = 0;
     }
 
-    int done = create_e_matrix(&lookupTable, sizeOfCMatrix, sizeOfEMatrix, &eMat, input, output);
+    int done = create_e_matrix(&lookupTable, sizeOfCMatrix, sizeOfEMatrix, &eMat, input, output, NUM_DIRECTIONS, VEC_HIST_LEN);
 
     fclose(input);
     fclose(output);

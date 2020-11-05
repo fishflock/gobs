@@ -2,9 +2,6 @@
 #include <string.h>
 #include "read_c_vectors.h"
 
-#define DEF_HIST_LEN 5
-#define DEF_DIR_NO 4
-
 /*
  * read_c_vectors
  * 
@@ -34,8 +31,8 @@ int read_c_vectors(char *past, char *future,
         return -1;
 
     int i;
-    int pastAsInts[4];
-    int futureAsInts[4];
+    int pastAsInts[dir];
+    int futureAsInts[dir];
     // Initialize vectors to all 0s
     for (i = 0; i < dir; i++)
     {
@@ -87,14 +84,6 @@ int read_c_vectors(char *past, char *future,
         return -1;
 
     return 1;
-}
-
-// Default values for read_c_vectors
-int read_cvec(char *past, char *future, FILE *file)
-{
-    int len = DEF_HIST_LEN;
-    int dir = DEF_DIR_NO;
-    return read_c_vectors(past, future, len, dir, file);
 }
 
 int read_uncompressed_vectors(char *vector,
