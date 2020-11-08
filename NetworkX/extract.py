@@ -36,7 +36,11 @@ def read_ep_matrix(gobs_in):
         i = i + 1
     return [labels, values]
 
-def graph(G, nx_out):
+def centrality(G, c):
+    if(c == 'eigen'):
+        return nx.algorithms.centrality.eigenvector_centrality_numpy(G);
+
+def graph(G, nx_out, scale_in):
 
     node_arr = [] #stores nodes with total weight < 1
     max_weight = 0
@@ -86,7 +90,13 @@ def graph(G, nx_out):
     #returns an array of the first 6 colors used in graph
     color_arr = colors()
 
-    scale = 15000/max_weight
+    #scale the nodes based on user input 
+    if (scale_in != 'weight'):
+        c_dic = centrality(G, scale_in)
+        scale_div = c_dic[str(max(c_dic))]
+        scale = 15000/scale_div
+    else:
+        scale = 15000/max_weight
 
     #draw the graph
     i = 0
@@ -99,12 +109,13 @@ def graph(G, nx_out):
         else:
             c = color_arr[i]
         for n in g:
-            s_arr.append(scale * G.nodes[n]['weight'])
+            #s_arr.append(scale * G.nodes[n]['weight'])
+            s_arr.append(scale * c_dic[str(n)])
             for e in G.edges(n):
                 if(e[0] == e[1]):
                     w = G.nodes[e[0]]['weight']
                 edge_list_arr.append(e)
-                edge_size_arr.append((scale * G[e[0]][e[1]][0]['weight'])/300)   
+                edge_size_arr.append(((15000/max_weight) * G[e[0]][e[1]][0]['weight'])/300)   
 
         #draw the nodes
         nx.draw_networkx(G,
@@ -131,7 +142,7 @@ def graph(G, nx_out):
 
 #function for testing with Facebook data
 def face():
-    ep_in = open("Facebook2.csv")
+    ep_in = open("Facebook1.csv")
     G = nx.MultiDiGraph()
 
     mapping = {}
@@ -147,14 +158,14 @@ def face():
             G[n1][n2][0]['weight'] = 1
             mapping[i] = row[3]
             i = i + 1
-
-    graph(G)
-
+    print("DONE PARSING")
+    graph(G, 'face.png')
 
 ################################################################  
 #main function, reads input from output of GOBS, outputs networkx as .png
 gobs_in = sys.argv[1]
 nx_out = sys.argv[2]
+scale_in = sys.argv[3]
 
 #read in values from epsilon state matrix, separate into labels and data
 ep_arr = read_ep_matrix(gobs_in)
@@ -172,5 +183,5 @@ for l in labels:
     i = i + 1
 G = nx.relabel_nodes(G,mapping)
 
-graph(G, nx_out)
+graph(G, nx_out, scale_in)
 ################################################################  
