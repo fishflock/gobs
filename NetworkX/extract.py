@@ -38,7 +38,11 @@ def read_ep_matrix(gobs_in):
 
 def centrality(G, c):
     if(c == 'eigen'):
-        return nx.algorithms.centrality.eigenvector_centrality_numpy(G);
+        return nx.algorithms.centrality.eigenvector_centrality_numpy(G)
+    elif (c == 'close'):
+        return nx.algorithms.centrality.closeness_centrality(G)
+    elif (c == 'between'):
+        return nx.algorithms.centrality.betweenness_centrality_source(G)
 
 def graph(G, nx_out, scale_in):
 
@@ -109,8 +113,10 @@ def graph(G, nx_out, scale_in):
         else:
             c = color_arr[i]
         for n in g:
-            #s_arr.append(scale * G.nodes[n]['weight'])
-            s_arr.append(scale * c_dic[str(n)])
+            if(scale_in == 'weight'):
+                s_arr.append(scale * G.nodes[n]['weight'])
+            else:
+                s_arr.append(scale * c_dic[str(n)])
             for e in G.edges(n):
                 if(e[0] == e[1]):
                     w = G.nodes[e[0]]['weight']
