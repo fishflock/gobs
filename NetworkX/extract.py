@@ -1,9 +1,12 @@
 import networkx as nx
+import json
+from networkx.readwrite import json_graph
 import matplotlib.pyplot as plt
 import numpy as np
 import random
 import sys
-import operator
+import copy
+
 
 def colors():
     return ['red',
@@ -36,6 +39,43 @@ def read_ep_matrix(gobs_in):
             values.append(row_int)
         i = i + 1
     return [labels, values]
+
+def blondel(G):
+    comms = []
+    for n in G:
+        comms.append([n])
+    node_moved = True
+    while(node_moved):
+        node_moved = False
+        for n in G:
+            n_comm = []
+
+            for c in comms:
+                if n in c:
+                    n_comm = c
+
+            max_mod = nx.algorithms.community.quality.modularity(G, comms)
+            new_comm = n_comm
+
+            
+            for m in G.neighbors(n):
+                for c in comms:
+                    if (m in c and c != n_comm):
+                        comms_temp = copy.deepcopy(comms)
+                        comms_temp[comms_temp.index(n_comm)].remove(n)
+                        comms_temp[comms_temp.index(c)].append(n)
+                        mod = nx.algorithms.community.quality.modularity(G, comms_temp)
+                        if (max_mod < mod):
+                            max_mod = mod
+                            new_comm = c
+                            node_moved = True
+
+            if(new_comm != n_comm):
+                comms[comms.index(n_comm)].remove(n)
+                comms[comms.index(new_comm)].append(n)
+
+    return comms
+        
 
 def centrality(G, c):
     if(c == 'eigen'):
@@ -82,12 +122,18 @@ def graph(G, nx_out, scale_in):
     for x in lpa:
         groups.append(x)
 
+    #blondel sorting
+    groups = blondel(G)
+
     #create layout of nodes
     #k is optimal distance between nodes
     #seed sets the 'randomness' of the layout to be constant
     #iterations determine how many times algorithm is run,
     #    which results in closer nodes that are more strongly connected
+    
     layout = nx.spring_layout(G, k=1, seed=24, iterations=40)
+    #layout = nx.spectral_layout(G)
+    #layout = nx.kamada_kawai_layout(G)
 
     #change size of output window
     fig, ax = plt.subplots(figsize=(15,10))
@@ -146,6 +192,9 @@ def graph(G, nx_out, scale_in):
                 arrowsize=1
                 )
         i = i + 1
+    data = json_graph.node_link_data(G)
+    with open('graph.json', 'w') as f:
+        json.dump(data, f, indent=4)
     plt.savefig(nx_out)
 
 #function for testing with Facebook data
