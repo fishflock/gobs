@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 import sys
+import operator
 
 def colors():
     return ['red',
@@ -97,8 +98,7 @@ def graph(G, nx_out, scale_in):
     #scale the nodes based on user input 
     if (scale_in != 'weight'):
         c_dic = centrality(G, scale_in)
-        scale_div = c_dic[str(max(c_dic))]
-        scale = 15000/scale_div
+        scale = 15000/max(c_dic.values())
     else:
         scale = 15000/max_weight
 
@@ -116,7 +116,10 @@ def graph(G, nx_out, scale_in):
             if(scale_in == 'weight'):
                 s_arr.append(scale * G.nodes[n]['weight'])
             else:
-                s_arr.append(scale * c_dic[str(n)])
+                if (c_dic[str(n)] < 0):
+                    s_arr.append(0)
+                else:
+                    s_arr.append(scale * c_dic[str(n)])
             for e in G.edges(n):
                 if(e[0] == e[1]):
                     w = G.nodes[e[0]]['weight']
@@ -127,7 +130,6 @@ def graph(G, nx_out, scale_in):
         nx.draw_networkx(G,
                 pos=layout,
                 with_labels=True,
-                #font_weight='bold',
                 nodelist=g,
                 node_size=s_arr,
                 node_color=c,
@@ -190,4 +192,4 @@ for l in labels:
 G = nx.relabel_nodes(G,mapping)
 
 graph(G, nx_out, scale_in)
-################################################################  
+################################################################
