@@ -24,17 +24,30 @@ int NUM_DIRECTIONS = 4;
 int debug = 1;
 
 int print_c_matrix(int realSize, char ***ptrToLabels, double ***ptrToMatrix);
+int print_c_matrix_to_file(int sizeOfCMatrix, char ***ptrToLabels, double ***ptrToMatrix, FILE *output_file);
 int print_labels(int realSize, char ***ptrToLabels);
 int print_e_lookup(struct luRow **ptrToLookupTable, int realSize, char ***ptrToLabels);
 
 int main(int argc, char *argv[])
 {
     //--------------- Varify input and output files ---------------
-    FILE *input, *output;
+    FILE *input, *output, *cMatOutput;
     char *input_file = (char *)malloc(BUFF_SIZE);
     char *output_file = (char *)malloc(BUFF_SIZE);
+    char *output_file_c_mat = (char *)malloc(BUFF_SIZE);
     input_file = argv[1];
     output_file = argv[2];
+
+    int extensionIdx = strlen(argv[2]) - 4;
+    for (int i = 0; i < strlen(argv[2]); i++)
+    {
+        if (i == extensionIdx)
+        {
+            break;
+        }
+        output_file_c_mat[i] = argv[2][i];
+    }
+    strcat(output_file_c_mat, "_c_mat.txt");
 
     //Check it input is .csv
     if (strcmp(&input_file[strlen(input_file) - 4], ".csv") == 0)
@@ -55,6 +68,7 @@ int main(int argc, char *argv[])
     else
     {
         output = fopen(output_file, "w");
+        cMatOutput = fopen(output_file_c_mat, "w");
     }
     //Check that input does exist
     if ((input = fopen(input_file, "r")) == NULL)
@@ -134,6 +148,12 @@ int main(int argc, char *argv[])
         printf("C Matrix Normalized by Number of Vectors: \n");
         int normalizedMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
     }
+
+    int printCMat = print_c_matrix_to_file(sizeOfCMatrix, &labels, &matrix, cMatOutput);
+
+    int probs = reduce_noise(sizeOfCMatrix, &matrix);
+    printf("C Matrix converted to probabilities: \n");
+    int probsMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
 
     // Create the epsilon lookup table
     //struct luRow lookupTable[100];
@@ -220,6 +240,37 @@ int print_c_matrix(int sizeOfCMatrix, char ***ptrToLabels, double ***ptrToMatrix
         for (int j = 0; j < sizeOfCMatrix; j++)
             printf("%.0f ", matrix[i][j]);
         printf("\n");
+    }
+    return 1;
+}
+
+int print_c_matrix_to_file(int sizeOfCMatrix, char ***ptrToLabels, double ***ptrToMatrix, FILE *output_file)
+{
+    char **labels = *ptrToLabels;
+    double **matrix = *ptrToMatrix;
+    int row, col, top;
+    fprintf(output_file, "Co-occurrence Matrix: \n");
+    fprintf(output_file, "            ");
+    for (top = 0; top < sizeOfCMatrix; top++)
+    {
+        fprintf(output_file, "%12s", labels[top]);
+        if (top == sizeOfCMatrix - 1)
+        {
+            fprintf(output_file, "\n");
+        }
+    }
+
+    for (row = 0; row < sizeOfCMatrix; row++)
+    {
+        fprintf(output_file, "%12s", labels[row]);
+        for (col = 0; col < sizeOfCMatrix; col++)
+        {
+            fprintf(output_file, "%12.0f", matrix[row][col]);
+            if (col == sizeOfCMatrix - 1)
+            {
+                fprintf(output_file, "\n");
+            }
+        }
     }
     return 1;
 }
