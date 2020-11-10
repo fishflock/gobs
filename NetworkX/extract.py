@@ -85,7 +85,7 @@ def centrality(G, c):
     elif (c == 'between'):
         return nx.algorithms.centrality.betweenness_centrality_source(G)
 
-def graph(G, nx_out, scale_in):
+def graph(G, nx_out, scale_in, sort_in):
 
     node_arr = [] #stores nodes with total weight < 1
     max_weight = 0
@@ -116,14 +116,14 @@ def graph(G, nx_out, scale_in):
     #remove nodes with weight < 1 (no connections)
     G.remove_nodes_from(node_arr)
 
-    #perform Label Propogation Algorithm to group nodes
+    #use user input to determine how to group nodes into communities
     groups = []
-    lpa = nx.algorithms.community.label_propagation.asyn_lpa_communities(G)
-    for x in lpa:
-        groups.append(x)
-
-    #blondel sorting
-    groups = blondel(G)
+    if(sort_in == 'lpa'):
+        lpa = nx.algorithms.community.label_propagation.asyn_lpa_communities(G)
+        for x in lpa:
+            groups.append(x)
+    elif(sort_in == 'blondel'):
+        groups = blondel(G)
 
     #create layout of nodes
     #k is optimal distance between nodes
@@ -223,6 +223,7 @@ def face():
 gobs_in = sys.argv[1]
 nx_out = sys.argv[2]
 scale_in = sys.argv[3]
+sort_in = sys.argv[4]
 
 #read in values from epsilon state matrix, separate into labels and data
 ep_arr = read_ep_matrix(gobs_in)
@@ -240,5 +241,5 @@ for l in labels:
     i = i + 1
 G = nx.relabel_nodes(G,mapping)
 
-graph(G, nx_out, scale_in)
+graph(G, nx_out, scale_in, sort_in)
 ################################################################
