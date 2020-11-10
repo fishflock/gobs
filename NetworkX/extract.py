@@ -2,6 +2,7 @@ import networkx as nx
 import json
 from networkx.readwrite import json_graph
 import matplotlib.pyplot as plt
+from fa2 import ForceAtlas2
 import numpy as np
 import random
 import sys
@@ -41,11 +42,14 @@ def read_ep_matrix(gobs_in):
     return [labels, values]
 
 def blondel(G):
+    #print("Starting blondel")
     comms = []
     for n in G:
         comms.append([n])
     node_moved = True
     while(node_moved):
+        #print(comms)
+        #print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         node_moved = False
         for n in G:
             n_comm = []
@@ -73,7 +77,7 @@ def blondel(G):
             if(new_comm != n_comm):
                 comms[comms.index(n_comm)].remove(n)
                 comms[comms.index(new_comm)].append(n)
-
+    #print("end blondel")
     return comms
         
 
@@ -85,7 +89,7 @@ def centrality(G, c):
     elif (c == 'between'):
         return nx.algorithms.centrality.betweenness_centrality_source(G)
 
-def graph(G, nx_out, scale_in, sort_in):
+def graph(G, nx_out, scale_in, sort_in, layout_in):
 
     node_arr = [] #stores nodes with total weight < 1
     max_weight = 0
@@ -130,10 +134,12 @@ def graph(G, nx_out, scale_in, sort_in):
     #seed sets the 'randomness' of the layout to be constant
     #iterations determine how many times algorithm is run,
     #    which results in closer nodes that are more strongly connected
-    
-    layout = nx.spring_layout(G, k=1, seed=24, iterations=40)
+    if(layout_in == 'spring'):
+        layout = nx.spring_layout(G, k=1, seed=24, iterations=40)
     #layout = nx.spectral_layout(G)
     #layout = nx.kamada_kawai_layout(G)
+    elif(layout == 'fa2'):
+        layout = ForceAtlas2().forceatlas2_networkx_layout(G, pos=None, iterations=40)
 
     #change size of output window
     fig, ax = plt.subplots(figsize=(15,10))
@@ -199,7 +205,7 @@ def graph(G, nx_out, scale_in, sort_in):
 
 #function for testing with Facebook data
 def face():
-    ep_in = open("Facebook1.csv")
+    ep_in = open("Facebook3.csv")
     G = nx.MultiDiGraph()
 
     mapping = {}
@@ -216,7 +222,7 @@ def face():
             mapping[i] = row[3]
             i = i + 1
     print("DONE PARSING")
-    graph(G, 'face.png')
+    graph(G, 'face.png', 'weight', 'blondel', 'spring')
 
 ################################################################  
 #main function, reads input from output of GOBS, outputs networkx as .png
@@ -224,6 +230,7 @@ gobs_in = sys.argv[1]
 nx_out = sys.argv[2]
 scale_in = sys.argv[3]
 sort_in = sys.argv[4]
+layout_in = sys.argv[5]
 
 #read in values from epsilon state matrix, separate into labels and data
 ep_arr = read_ep_matrix(gobs_in)
@@ -241,5 +248,5 @@ for l in labels:
     i = i + 1
 G = nx.relabel_nodes(G,mapping)
 
-graph(G, nx_out, scale_in, sort_in)
+graph(G, nx_out, scale_in, sort_in, layout_in)
 ################################################################
