@@ -20,6 +20,7 @@ int NORMALIZE_FLAG = 0;
 double ALPHA = 0.0;
 int VEC_HIST_LEN = 5;
 int NUM_DIRECTIONS = 4;
+int STAT_METHOD = 1;
 
 int debug = 1;
 
@@ -99,6 +100,20 @@ int main(int argc, char *argv[])
         printf("Setting NUM_DIRECTIONS to: %d\n", NUM_DIRECTIONS);
     }
 
+    if (argv[7] != NULL)
+    {
+        STAT_METHOD = atoi(argv[7]);
+        if(STAT_METHOD != 1 && STAT_METHOD != 2)
+        {
+            printf("Statistic Comparison choice invalid. Setting STAT_METHOD to 1.");
+            STAT_METHOD = 1;
+        }
+        else
+        { 
+            printf("Setting STAT_METHOD to: %d\n", STAT_METHOD);
+        }   
+    }
+
     //-------------------------------------------------------------------
 
     int i;
@@ -166,7 +181,7 @@ int main(int argc, char *argv[])
     }
 
     // Return # of group leaders ???
-    int sizeOfEMatrix = create_e_table(&lookupTable, NUM_DIRECTIONS, sizeOfCMatrix, &matrix, &labels, ALPHA);
+    int sizeOfEMatrix = create_e_table(&lookupTable, NUM_DIRECTIONS, sizeOfCMatrix, &matrix, &labels, ALPHA, STAT_METHOD);
     printf("E matrix is %dx%d\n", sizeOfEMatrix, sizeOfEMatrix);
     if (debug)
     {

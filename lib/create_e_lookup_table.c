@@ -6,7 +6,7 @@
 
 #define EULERS 2.71828
 
-int create_e_table(struct luRow **ptrToLookupTable, int dir, int realSize, double ***ptrToMatrix, char ***ptrToLabels, double ALPHA)
+int create_e_table(struct luRow **ptrToLookupTable, int dir, int realSize, double ***ptrToMatrix, char ***ptrToLabels, double ALPHA, int STAT_METHOD)
 {
     struct luRow *lookupTable = *ptrToLookupTable;
     char **labels = *ptrToLabels;
@@ -26,11 +26,11 @@ int create_e_table(struct luRow **ptrToLookupTable, int dir, int realSize, doubl
     // Add the corresponding vector of first row to the epsilon table
     strcpy(lookupTable[0].vector, labels[0]);
 
-    int fillTab = fill_e_table(flags, &lookupTable, dir, realSize, &matrix, &labels, ALPHA);
+    int fillTab = fill_e_table(flags, &lookupTable, dir, realSize, &matrix, &labels, ALPHA, STAT_METHOD);
     return fillTab;
 }
 
-int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realSize, double ***ptrToMatrix, char ***ptrToLabels, double ALPHA)
+int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realSize, double ***ptrToMatrix, char ***ptrToLabels, double ALPHA, int STAT_METHOD)
 {
     struct luRow *lookupTable = *ptrToLookupTable;
     char **labels = *ptrToLabels;
@@ -52,9 +52,18 @@ int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realS
                 if (flags[i] == 0)
                 {
                     total = 0;
-                    //compare_rows(matrix[currentLead], matrix[i], realSize, &total);
-                    g_test(matrix[currentLead], matrix[i], realSize, &total);
-                    printf("Comparing %s to %s ---> Total: %f\n", labels[i], labels[currentLead], total);
+                    if(STAT_METHOD == 1)
+                    {
+                        printf("Performing X squared test\n");
+                        compare_rows(matrix[currentLead], matrix[i], realSize, &total);
+                    }
+                    if(STAT_METHOD == 2)
+                    {
+                        printf("Performing g test\n");
+                        g_test(matrix[currentLead], matrix[i], realSize, &total);
+                        //printf("Comparing %s to %s ---> Total: %f\n", labels[i], labels[currentLead], total);
+                    }             
+                    
 
                     if (total < ALPHA)
                     {
