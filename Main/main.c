@@ -147,11 +147,15 @@ int main(int argc, char *argv[])
             matrix[i][j] = 0;
     }
 
+
     // Create c matrix
     int numVecsRecorded;
     int sizeOfCMatrix = create_c_matrix(NUM_DIRECTIONS, VEC_HIST_LEN, &labels, &matrix, input, &numVecsRecorded);
     printf("C matrix is %dx%d\n", sizeOfCMatrix, sizeOfCMatrix);
     printf("Number of unqiue vectors (size of labels array) %d\n", sizeOfCMatrix);
+
+    int printCMat = print_c_matrix_to_file(sizeOfCMatrix, &labels, &matrix, cMatOutput);
+
     if (debug)
     {
         int printCMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
@@ -163,8 +167,6 @@ int main(int argc, char *argv[])
         printf("C Matrix Normalized by Number of Vectors: \n");
         int normalizedMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
     }
-
-    int printCMat = print_c_matrix_to_file(sizeOfCMatrix, &labels, &matrix, cMatOutput);
 
     int probs = reduce_noise(sizeOfCMatrix, &matrix);
     printf("C Matrix converted to probabilities: \n");
