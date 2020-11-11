@@ -1,6 +1,4 @@
 import networkx as nx
-import json
-from networkx.readwrite import json_graph
 import matplotlib.pyplot as plt
 from fa2 import ForceAtlas2
 import numpy as np
@@ -42,7 +40,6 @@ def read_ep_matrix(gobs_in):
     return [labels, values]
 
 def blondel(G):
-    #print("Starting blondel")
     comms = []
     for n in G:
         comms.append([n])
@@ -77,7 +74,6 @@ def blondel(G):
             if(new_comm != n_comm):
                 comms[comms.index(n_comm)].remove(n)
                 comms[comms.index(new_comm)].append(n)
-    #print("end blondel")
     return comms
         
 
@@ -138,7 +134,7 @@ def graph(G, nx_out, scale_in, sort_in, layout_in):
         layout = nx.spring_layout(G, k=1, seed=24, iterations=40)
     #layout = nx.spectral_layout(G)
     #layout = nx.kamada_kawai_layout(G)
-    elif(layout == 'fa2'):
+    elif(layout_in == 'fa2'):
         layout = ForceAtlas2().forceatlas2_networkx_layout(G, pos=None, iterations=40)
 
     #change size of output window
@@ -198,9 +194,6 @@ def graph(G, nx_out, scale_in, sort_in, layout_in):
                 arrowsize=1
                 )
         i = i + 1
-    data = json_graph.node_link_data(G)
-    with open('graph.json', 'w') as f:
-        json.dump(data, f, indent=4)
     plt.savefig(nx_out)
 
 #function for testing with Facebook data
