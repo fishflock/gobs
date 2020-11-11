@@ -4,6 +4,8 @@
 #include <math.h>
 #include "create_e_lookup_table.h"
 
+#define EULERS 2.71828
+
 int create_e_table(struct luRow **ptrToLookupTable, int dir, int realSize, double ***ptrToMatrix, char ***ptrToLabels, double ALPHA)
 {
     struct luRow *lookupTable = *ptrToLookupTable;
@@ -50,8 +52,9 @@ int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realS
                 if (flags[i] == 0)
                 {
                     total = 0;
-                    compare_rows(matrix[currentLead], matrix[i], realSize, &total);
-                    //printf("Comparing %s to %s ---> Total: %f\n", labels[i], labels[currentLead], total);
+                    //compare_rows(matrix[currentLead], matrix[i], realSize, &total);
+                    g_test(matrix[currentLead], matrix[i], realSize, &total);
+                    printf("Comparing %s to %s ---> Total: %f\n", labels[i], labels[currentLead], total);
 
                     if (total < ALPHA)
                     {
@@ -82,17 +85,43 @@ int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realS
     return uniqueEls;
 }
 
+int g_test(double *leadRow, double *otherRow, int realSize, double *total)
+{
+    double currentTotal = 0.0;
+    for (int k = 0; k < realSize; k++)
+    {
+        if (leadRow[k] > 0.0)
+        {
+            if ((otherRow[k] / leadRow[k]) > 0.0)
+            {
+                currentTotal += otherRow[k] * (log(otherRow[k] / leadRow[k]));
+            }
+        }
+        //printf("%f : ", currentTotal);
+    }
+
+    *total = 2 * currentTotal;
+    printf("\nG-Test val: %f\n", *total);
+    return 1;
+}
+
 int compare_rows(double *row1, double *row2, int realSize, double *total)
 {
     double sum1 = 0;
     double sum2 = 0;
 
+    int degreeOfFreedom = 0;
     for (int i = 0; i < realSize; i++)
     {
         //printf("%f : %f\n", row1[i], row2[i]);
         sum1 += row1[i];
         sum2 += row2[i];
+        if ((row1[i] > 0) || (row2[i] > 0))
+        {
+            degreeOfFreedom++;
+        }
     }
+    printf("DEGREE OF FREEDOM: %d\n", degreeOfFreedom);
     // printf("sum1: %f\n", sum1);
     // printf("sum2: %f\n", sum2);
 
@@ -123,14 +152,49 @@ int compare_rows(double *row1, double *row2, int realSize, double *total)
             // printf("k2 * row2[k]: %f\n", k2 * row2[k]);
             // printf("numerator: %f\n", numerator);
             // printf("denominator: %f\n", denominator);
-            // printf("diff: %f\n", (numerator / denominator));
+
+            //*total += chsppf((numerator / denominator), realSize);
             *total += (numerator / denominator);
+
             // printf("Total: %f\n", *total);
             // printf("\n\n");
         }
     }
 
+    printf("Total: %f\n", *total);
+
+    double adjustedChiSquared = 0.0;
+    if (*total > 0.0)
+    {
+        adjustedChiSquared = chsppf(*total, degreeOfFreedom);
+    }
+
+    //double adjustedChiSquared = chsppf(*total, realSize);
+    printf("adjusted chi-squared : %f\n", adjustedChiSquared);
+    *total = adjustedChiSquared;
+
     return 1;
+}
+
+double chsppf(double chiSquaredVal, int rowLength)
+{
+    double eulersVal = pow(EULERS, (0 - chiSquaredVal) / 2);
+    double xVal = pow(chiSquaredVal, (rowLength / 2) - 1);
+    double numerator = eulersVal * xVal;
+
+    int x = (rowLength / 2) - 1;
+    double gammaVal = 1;
+    for (int i = 1; i <= x; i++)
+    {
+        gammaVal = gammaVal * i;
+    }
+
+    double twosVal = pow(2.0, (rowLength / 2));
+    double denominator = twosVal * gammaVal;
+
+    double alpha = numerator / denominator;
+    //printf("numerator: %.0000f // denominator: %.0000f\n", numerator, denominator);
+    return alpha;
 }
 
 int reduce_noise(int realSize, double ***ptrToMatrix)
@@ -153,16 +217,8 @@ int reduce_noise(int realSize, double ***ptrToMatrix)
     {
         for (j = 0; j < realSize; j++)
         {
-            // printf("%f ---> ", matrix[i][j]);
-            // printf("%f ---> ", matrix[i][j] / matrixSum);
-
-            double test = matrix[i][j] / matrixSum;
-            //printf("%f ---> ", log10(test));
-            if (matrix[i][j] != 0)
-            {
-                matrix[i][j] = fabs(log10(matrix[i][j] / matrixSum));
-                //printf("Applied abs/log to [%d][%d]:    %f\n", i, j, matrix[i][j]);
-            }
+            matrix[i][j] = matrix[i][j] / matrixSum;
+            //printf("[%d, %d] = %f\n", i, j, matrix[i][j]);
         }
     }
     return 1;
