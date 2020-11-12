@@ -85,7 +85,7 @@ def centrality(G, c):
     elif (c == 'between'):
         return nx.algorithms.centrality.betweenness_centrality_source(G)
 
-def graph(G, nx_out, scale_in, sort_in, layout_in):
+def graph(G, nx_out, scale_in, sort_in, layout_in, scale_mult):
 
     node_arr = [] #stores nodes with total weight < 1
     max_weight = 0
@@ -148,7 +148,7 @@ def graph(G, nx_out, scale_in, sort_in, layout_in):
         c_dic = centrality(G, scale_in)
         scale = 15000/max(c_dic.values())
     else:
-        scale = 15000/max_weight
+        scale = scale_mult * (15000/max_weight)
 
     #draw the graph
     i = 0
@@ -224,6 +224,7 @@ nx_out = sys.argv[2]
 scale_in = sys.argv[3]
 sort_in = sys.argv[4]
 layout_in = sys.argv[5]
+scale_mult = float(sys.argv[6])
 
 #read in values from epsilon state matrix, separate into labels and data
 ep_arr = read_ep_matrix(gobs_in)
@@ -241,5 +242,5 @@ for l in labels:
     i = i + 1
 G = nx.relabel_nodes(G,mapping)
 
-graph(G, nx_out, scale_in, sort_in, layout_in)
+graph(G, nx_out, scale_in, sort_in, layout_in, scale_mult)
 ################################################################
