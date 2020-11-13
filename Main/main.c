@@ -20,6 +20,7 @@ int NORMALIZE_FLAG = 0;
 double ALPHA = 0.0;
 int VEC_HIST_LEN = 5;
 int NUM_DIRECTIONS = 4;
+int STAT_METHOD = 1;
 
 int debug = 1;
 
@@ -99,6 +100,20 @@ int main(int argc, char *argv[])
         printf("Setting NUM_DIRECTIONS to: %d\n", NUM_DIRECTIONS);
     }
 
+    if (argv[7] != NULL)
+    {
+        STAT_METHOD = atoi(argv[7]);
+        if(STAT_METHOD != 1 && STAT_METHOD != 2)
+        {
+            printf("Statistic Comparison choice invalid. Setting STAT_METHOD to 1.");
+            STAT_METHOD = 1;
+        }
+        else
+        { 
+            printf("Setting STAT_METHOD to: %d\n", STAT_METHOD);
+        }   
+    }
+
     //-------------------------------------------------------------------
 
     int i;
@@ -132,11 +147,15 @@ int main(int argc, char *argv[])
             matrix[i][j] = 0;
     }
 
+
     // Create c matrix
     int numVecsRecorded;
     int sizeOfCMatrix = create_c_matrix(NUM_DIRECTIONS, VEC_HIST_LEN, &labels, &matrix, input, &numVecsRecorded);
     printf("C matrix is %dx%d\n", sizeOfCMatrix, sizeOfCMatrix);
     printf("Number of unqiue vectors (size of labels array) %d\n", sizeOfCMatrix);
+
+    int printCMat = print_c_matrix_to_file(sizeOfCMatrix, &labels, &matrix, cMatOutput);
+
     if (debug)
     {
         int printCMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
@@ -148,8 +167,6 @@ int main(int argc, char *argv[])
         printf("C Matrix Normalized by Number of Vectors: \n");
         int normalizedMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
     }
-
-    int printCMat = print_c_matrix_to_file(sizeOfCMatrix, &labels, &matrix, cMatOutput);
 
     int probs = reduce_noise(sizeOfCMatrix, &matrix);
     printf("C Matrix converted to probabilities: \n");
@@ -166,7 +183,7 @@ int main(int argc, char *argv[])
     }
 
     // Return # of group leaders ???
-    int sizeOfEMatrix = create_e_table(&lookupTable, NUM_DIRECTIONS, sizeOfCMatrix, &matrix, &labels, ALPHA);
+    int sizeOfEMatrix = create_e_table(&lookupTable, NUM_DIRECTIONS, sizeOfCMatrix, &matrix, &labels, ALPHA, STAT_METHOD);
     printf("E matrix is %dx%d\n", sizeOfEMatrix, sizeOfEMatrix);
     if (debug)
     {
