@@ -6,6 +6,7 @@ struct luRow
 {
     char *epsilon;
     char *vector;
+    int epsilonIdx;
 };
 
 #endif

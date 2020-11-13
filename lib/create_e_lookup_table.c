@@ -39,6 +39,7 @@ int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realS
     int lastEl = 1;
     int currentLead = 0;
     double total = 0;
+    int epsilonIdx = 0;
     int i, j;
     // Loop through every row in matrix
     for (currentLead = 0; currentLead < realSize; currentLead++)
@@ -52,21 +53,25 @@ int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realS
                 if (flags[i] == 0)
                 {
                     total = 0;
-                    if(STAT_METHOD == 1)
+                    if (STAT_METHOD == 1)
                     {
-                        printf("Performing X squared test\n");
+                        //printf("Performing X squared test\n");
                         compare_rows(matrix[currentLead], matrix[i], realSize, &total);
                     }
-                    if(STAT_METHOD == 2)
+                    if (STAT_METHOD == 2)
                     {
-                        printf("Performing g test\n");
+                        //printf("Performing g test\n");
                         g_test(matrix[currentLead], matrix[i], realSize, &total);
                         //printf("Comparing %s to %s ---> Total: %f\n", labels[i], labels[currentLead], total);
-                    }             
-                    
+                    }
 
                     if (total < ALPHA)
                     {
+                        if (strcmp(lookupTable[lastEl - 1].epsilon, labels[currentLead]) != 0)
+                        {
+                            epsilonIdx++;
+                        }
+
                         //printf("       Adding %s to the %s group.\n", labels[i], labels[currentLead]);
                         // Flag this row!
                         flags[i] = 1;
@@ -74,6 +79,7 @@ int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realS
                         strcpy(lookupTable[lastEl].epsilon, labels[currentLead]);
                         // Add the follower's vector to the epsilon table
                         strcpy(lookupTable[lastEl].vector, labels[i]);
+                        lookupTable[lastEl].epsilonIdx = epsilonIdx;
                         lastEl++;
                     }
                 }
@@ -110,7 +116,7 @@ int g_test(double *leadRow, double *otherRow, int realSize, double *total)
     }
 
     *total = 2 * currentTotal;
-    printf("\nG-Test val: %f\n", *total);
+    //printf("\nG-Test val: %f\n", *total);
     return 1;
 }
 
@@ -130,7 +136,7 @@ int compare_rows(double *row1, double *row2, int realSize, double *total)
             degreeOfFreedom++;
         }
     }
-    printf("DEGREE OF FREEDOM: %d\n", degreeOfFreedom);
+    //printf("DEGREE OF FREEDOM: %d\n", degreeOfFreedom);
     // printf("sum1: %f\n", sum1);
     // printf("sum2: %f\n", sum2);
 
@@ -170,7 +176,7 @@ int compare_rows(double *row1, double *row2, int realSize, double *total)
         }
     }
 
-    printf("Total: %f\n", *total);
+    //printf("Total: %f\n", *total);
 
     double adjustedChiSquared = 0.0;
     if (*total > 0.0)
@@ -178,8 +184,7 @@ int compare_rows(double *row1, double *row2, int realSize, double *total)
         adjustedChiSquared = chsppf(*total, degreeOfFreedom);
     }
 
-    //double adjustedChiSquared = chsppf(*total, realSize);
-    printf("adjusted chi-squared : %f\n", adjustedChiSquared);
+    //printf("adjusted chi-squared : %f\n", adjustedChiSquared);
     *total = adjustedChiSquared;
 
     return 1;
@@ -206,7 +211,7 @@ double chsppf(double chiSquaredVal, int rowLength)
     return alpha;
 }
 
-int reduce_noise(int realSize, double ***ptrToMatrix)
+int convert_to_probabilities(int realSize, double ***ptrToMatrix)
 {
     double **matrix = *ptrToMatrix;
     int i, j;
