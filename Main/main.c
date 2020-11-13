@@ -103,15 +103,15 @@ int main(int argc, char *argv[])
     if (argv[7] != NULL)
     {
         STAT_METHOD = atoi(argv[7]);
-        if(STAT_METHOD != 1 && STAT_METHOD != 2)
+        if (STAT_METHOD != 1 && STAT_METHOD != 2)
         {
             printf("Statistic Comparison choice invalid. Setting STAT_METHOD to 1.");
             STAT_METHOD = 1;
         }
         else
-        { 
+        {
             printf("Setting STAT_METHOD to: %d\n", STAT_METHOD);
-        }   
+        }
     }
 
     //-------------------------------------------------------------------
@@ -147,7 +147,6 @@ int main(int argc, char *argv[])
             matrix[i][j] = 0;
     }
 
-
     // Create c matrix
     int numVecsRecorded;
     int sizeOfCMatrix = create_c_matrix(NUM_DIRECTIONS, VEC_HIST_LEN, &labels, &matrix, input, &numVecsRecorded);
@@ -168,9 +167,9 @@ int main(int argc, char *argv[])
         int normalizedMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
     }
 
-    int probs = reduce_noise(sizeOfCMatrix, &matrix);
-    printf("C Matrix converted to probabilities: \n");
-    int probsMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
+    int probs = convert_to_probabilities(sizeOfCMatrix, &matrix);
+    //printf("C Matrix converted to probabilities: \n");
+    //int probsMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
 
     // Create the epsilon lookup table
     //struct luRow lookupTable[100];
