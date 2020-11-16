@@ -13,7 +13,7 @@ def colors():
             'green',
             'gold',
             'm',
-            'c',
+            'c'
             ]     
 
 def read_ep_matrix(gobs_in):
@@ -45,8 +45,6 @@ def blondel(G):
         comms.append([n])
     node_moved = True
     while(node_moved):
-        #print(comms)
-        #print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         node_moved = False
         for n in G:
             n_comm = []
@@ -143,7 +141,7 @@ def graph(G, nx_out, scale_in, sort_in, layout_in, scale_mult):
     #returns an array of the first 6 colors used in graph
     color_arr = colors()
 
-    #scale the nodes based on user input 
+    #scale the nodes based on user input
     if (scale_in != 'weight'):
         c_dic = centrality(G, scale_in)
         scale = 15000/max(c_dic.values())
@@ -173,7 +171,6 @@ def graph(G, nx_out, scale_in, sort_in, layout_in, scale_mult):
                     w = G.nodes[e[0]]['weight']
                 edge_list_arr.append(e)
                 edge_size_arr.append(((15000/max_weight) * G[e[0]][e[1]][0]['weight'])/300)   
-
         #draw the nodes
         nx.draw_networkx(G,
                 pos=layout,
@@ -215,7 +212,7 @@ def face():
             mapping[i] = row[3]
             i = i + 1
     print("DONE PARSING")
-    graph(G, 'face.png', 'weight', 'blondel', 'spring')
+    graph(G, 'face.png', 'weight', 'blondel', 'spring', 1)
 
 ################################################################  
 #main function, reads input from output of GOBS, outputs networkx as .png
