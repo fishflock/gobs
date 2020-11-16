@@ -18,6 +18,7 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
     char cvecAsString[dir + 1];
     char current[dir + 1];
     char next[dir + 1];
+    int errorFlag = 0;
 
     read_uncompressed_vectors(vector, hist, input_file);
 
@@ -67,7 +68,7 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
         {
             if (strcmp(current, lookupTable[i].vector) == 0)
             {
-                currentPos = get_epsilon_pos(lookupTable[i].epsilon, &lookupTable, sizeofLookupTable);
+                currentPos = lookupTable[i].epsilonIdx;
                 //printf("currentPos: %d\n", currentPos);
                 break;
             }
@@ -77,7 +78,7 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
         {
             if (strcmp(next, lookupTable[j].vector) == 0)
             {
-                nextPos = get_epsilon_pos(lookupTable[j].epsilon, &lookupTable, sizeofLookupTable);
+                nextPos = lookupTable[j].epsilonIdx;
                 //printf("nextPos: %d\n", nextPos);
                 break;
             }
@@ -89,27 +90,31 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
         }
         else
         {
-            printf("Could not find a position in the matrix to match: \n");
-            printf("Past vector: %s\n", current);
-            printf("Past+1 vector: %s\n", next);
+            // ERROR: Something went wrong.
+            // Could not find a position in the matrix to match the past vector and past+1 vector
+            errorFlag = 1;
         }
 
+        currentPos = -1;
+        nextPos = -1;
         strcpy(current, next);
+    }
+
+    if (errorFlag)
+    {
+        printf("WARNING: One or more vectors could not be mapped to an epsilon matrix cell.\n");
     }
 
     // Loop through the lookupTable and find all the unique labels
     // Save them in an array of strings called uniqueLabels
     char **uniqueLabels = malloc(numRows * sizeof(char *));
     int uniqueLabelsCount = 0;
-    char currentEpsilon[dir + 1];
-    strcpy(currentEpsilon, lookupTable[0].epsilon);
     for (int k = 0; k < sizeofLookupTable; k++)
     {
-        if ((k == 0) || (strcmp(currentEpsilon, lookupTable[k].epsilon) != 0))
+        if ((k == 0) || (lookupTable[k].epsilonIdx != lookupTable[k - 1].epsilonIdx))
         {
             uniqueLabels[uniqueLabelsCount] = malloc((dir + 1) * sizeof(char));
             strcpy(uniqueLabels[uniqueLabelsCount], lookupTable[k].epsilon);
-            strcpy(currentEpsilon, lookupTable[k].epsilon);
             uniqueLabelsCount++;
         }
     }
@@ -149,29 +154,4 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
 
     fclose(output_file);
     return 1;
-}
-
-int get_epsilon_pos(char *epString, struct luRow **ptrToLookupTable, int sizeofLookupTable)
-{
-    struct luRow *lookupTable = *ptrToLookupTable;
-    int unique = 0;
-    for (int m = 0; m < sizeofLookupTable; m++)
-    {
-        if (m > 0)
-        {
-
-            if (strcmp(lookupTable[m - 1].epsilon, lookupTable[m].epsilon) == 1)
-            {
-                // printf("1: lookupTable[m - 1].epsilon ---> %s\n", lookupTable[m - 1].epsilon);
-                // printf("2: lookupTable[m].epsilon ---> %s\n", lookupTable[m].epsilon);
-                unique++;
-            }
-        }
-
-        if (!strcmp(epString, lookupTable[m].epsilon))
-        {
-            return unique;
-        }
-    }
-    return -1;
 }

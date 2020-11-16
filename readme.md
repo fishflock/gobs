@@ -9,8 +9,11 @@ To run the program, run the "make" command from the gobs directory. Then run ./g
 4. Alpha value
 5. Vector history length (5-15) 
 6. Number of directions (4 or 8)
+7. Statistical Comparison Method:
+   1 for X Squared test
+   2 for G-Test
 
-Example run command: "./gobs Main/input/basic.csv output.txt 1 1 5 4"
+Example run command: "./gobs Main/input/basic.csv output.txt 1 1 .1 4 1"
 
 
 ### NetLogo Data Generation
