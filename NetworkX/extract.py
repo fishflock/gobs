@@ -6,7 +6,7 @@ import random
 import sys
 import copy
 
-
+#returns one of six default colors
 def colors():
     return ['red',
             'b',
@@ -16,6 +16,7 @@ def colors():
             'c'
             ]     
 
+#read data from epsilon matrix/GOBS output
 def read_ep_matrix(gobs_in):
     ep_in = open(gobs_in)
 
@@ -39,24 +40,31 @@ def read_ep_matrix(gobs_in):
         i = i + 1
     return [labels, values]
 
+#simple implentation of Blondel algorithm (https://www.researchgate.net/publication/1913681_Fast_Unfolding_of_Communities_in_Large_Networks)
 def blondel(G):
+
+    #put each node into G into their own communities
     comms = []
     for n in G:
         comms.append([n])
+
+    #run algorithm repeatedely until no nodes are moved
     node_moved = True
     while(node_moved):
         node_moved = False
         for n in G:
             n_comm = []
 
+            #check each community and assign the one containing n
             for c in comms:
                 if n in c:
                     n_comm = c
 
+            #calculate current modularity
             max_mod = nx.algorithms.community.quality.modularity(G, comms)
             new_comm = n_comm
 
-            
+            #check the modularity of G resulting from moving n into the community of each of n's neighbors
             for m in G.neighbors(n):
                 for c in comms:
                     if (m in c and c != n_comm):
@@ -64,17 +72,20 @@ def blondel(G):
                         comms_temp[comms_temp.index(n_comm)].remove(n)
                         comms_temp[comms_temp.index(c)].append(n)
                         mod = nx.algorithms.community.quality.modularity(G, comms_temp)
+
+                        #check if new modularity is greater
                         if (max_mod < mod):
                             max_mod = mod
                             new_comm = c
                             node_moved = True
 
+            #if G has a higher modularity by moving n, move n into new community
             if(new_comm != n_comm):
                 comms[comms.index(n_comm)].remove(n)
                 comms[comms.index(new_comm)].append(n)
     return comms
         
-
+#returns centrality values of network
 def centrality(G, c):
     if(c == 'eigen'):
         return nx.algorithms.centrality.eigenvector_centrality_numpy(G)
@@ -83,6 +94,8 @@ def centrality(G, c):
     elif (c == 'between'):
         return nx.algorithms.centrality.betweenness_centrality_source(G)
 
+
+#main function to create network graph
 def graph(G, nx_out, scale_in, sort_in, layout_in, scale_mult):
 
     node_arr = [] #stores nodes with total weight < 1
@@ -123,6 +136,9 @@ def graph(G, nx_out, scale_in, sort_in, layout_in, scale_mult):
     elif(sort_in == 'blondel'):
         groups = blondel(G)
 
+    for n in G:
+        groups.append([n])
+
     #create layout of nodes
     #k is optimal distance between nodes
     #seed sets the 'randomness' of the layout to be constant
@@ -130,8 +146,6 @@ def graph(G, nx_out, scale_in, sort_in, layout_in, scale_mult):
     #    which results in closer nodes that are more strongly connected
     if(layout_in == 'spring'):
         layout = nx.spring_layout(G, k=1, seed=24, iterations=40)
-    #layout = nx.spectral_layout(G)
-    #layout = nx.kamada_kawai_layout(G)
     elif(layout_in == 'fa2'):
         layout = ForceAtlas2().forceatlas2_networkx_layout(G, pos=None, iterations=40)
 
@@ -154,10 +168,14 @@ def graph(G, nx_out, scale_in, sort_in, layout_in, scale_mult):
         edge_list_arr = []
         edge_size_arr = []
         s_arr = []
-        if i > 5:
+
+        #pick from preset colors first, otherwise generate a random color for group
+        if i > 6:
             c = [[random.random(),random.random(),random.random()]]
         else:
             c = color_arr[i]
+
+        #for each node in the group, add node size based on scale to s_arr  
         for n in g:
             if(scale_in == 'weight'):
                 s_arr.append(scale * G.nodes[n]['weight'])
@@ -166,11 +184,14 @@ def graph(G, nx_out, scale_in, sort_in, layout_in, scale_mult):
                     s_arr.append(0)
                 else:
                     s_arr.append(scale * c_dic[str(n)])
+
+            #for each edge of n, calculate edge size and update edge arrays
             for e in G.edges(n):
                 if(e[0] == e[1]):
                     w = G.nodes[e[0]]['weight']
                 edge_list_arr.append(e)
-                edge_size_arr.append(((15000/max_weight) * G[e[0]][e[1]][0]['weight'])/300)   
+                edge_size_arr.append(((15000/max_weight) * G[e[0]][e[1]][0]['weight'])/250)   
+
         #draw the nodes
         nx.draw_networkx(G,
                 pos=layout,
@@ -191,28 +212,10 @@ def graph(G, nx_out, scale_in, sort_in, layout_in, scale_mult):
                 arrowsize=1
                 )
         i = i + 1
+
+    #save graph as a PNG file
     plt.savefig(nx_out)
 
-#function for testing with Facebook data
-def face():
-    ep_in = open("Facebook3.csv")
-    G = nx.MultiDiGraph()
-
-    mapping = {}
-    i = 0
-    for line in ep_in:
-        if i == 0:
-            i = i + 1
-        else:
-            row = line.split(',')
-            n1 = int(row[0])
-            n2 = int(row[1])
-            G.add_edge(n1,n2)
-            G[n1][n2][0]['weight'] = 1
-            mapping[i] = row[3]
-            i = i + 1
-    print("DONE PARSING")
-    graph(G, 'face.png', 'weight', 'blondel', 'spring', 1)
 
 ################################################################  
 #main function, reads input from output of GOBS, outputs networkx as .png
