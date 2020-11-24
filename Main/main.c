@@ -13,6 +13,20 @@
 #include <unistd.h>
 #include <ctype.h>
 
+/**
+ * This program was created and maintained by the 2020 Capstone 2 team, Fish Flock.
+ * This program was based on Geometry of Behavioral Spaces (GOBS) framework created by 
+ * Dr. Martin Cenek and can be used to analyze large sets of data collected from a moving 
+ * system. The GOBS framework produces a matrix that can be used to identify emergent 
+ * behaviors from the moving system in question.
+ * 
+ * This file contains the main entry point to the GOBS program.
+ * 
+ * @author: Tawny Motoyama, Cole Holbrook, Taylor Odem, and Kollin Raudsepp
+ * @version: 1.0.0
+ * 
+*/
+
 int BUFF_SIZE = 128;
 int MAX_SIZE = 816;
 
@@ -29,9 +43,17 @@ int print_c_matrix_to_file(int sizeOfCMatrix, char ***ptrToLabels, double ***ptr
 int print_labels(int realSize, char ***ptrToLabels);
 int print_e_lookup(struct luRow **ptrToLookupTable, int realSize, char ***ptrToLabels);
 
+/**
+ * This is the entry point to the GOBS program. This function initializes input and output 
+ * files, initializes necessary data structures, and calls all functions to apply data 
+ * manipulation.
+ * 
+ * @param argc: Number of parameters
+ * @param argv: Parameters as an array of strings 
+ */
 int main(int argc, char *argv[])
 {
-    //--------------- Varify input and output files ---------------
+    //--------------- Verify input and output files ---------------
     FILE *input, *output, *cMatOutput;
     char *input_file = (char *)malloc(BUFF_SIZE);
     char *output_file = (char *)malloc(BUFF_SIZE);
@@ -168,11 +190,8 @@ int main(int argc, char *argv[])
     }
 
     int probs = convert_to_probabilities(sizeOfCMatrix, &matrix);
-    //printf("C Matrix converted to probabilities: \n");
-    //int probsMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
 
     // Create the epsilon lookup table
-    //struct luRow lookupTable[100];
     struct luRow *lookupTable = (struct luRow *)malloc(sizeof(struct luRow) * MAX_SIZE);
 
     for (i = 0; i < MAX_SIZE; i++)
@@ -245,6 +264,15 @@ int main(int argc, char *argv[])
 //##################################################################################
 // HELPER METHODS FOR PRINTING TO TERMINAL
 
+/**
+ * This function prints the co-occurrence matrix (C-matrix) to the console.
+ * Note: Each row/column of the matrix is represented by a "label." This label is the 
+ *          compressed vector the row/column corresponds to
+ * 
+ * @param sizeOfCMatrix: Number of rows/columns in the C-matrix
+ * @param ptrToLabels: Pointer to the array of strings that are the labels for the C-matrix
+ * @param ptrToMatrix: Pointer to the C-matrix
+ */
 int print_c_matrix(int sizeOfCMatrix, char ***ptrToLabels, double ***ptrToMatrix)
 {
     char **labels = *ptrToLabels;
@@ -260,6 +288,20 @@ int print_c_matrix(int sizeOfCMatrix, char ***ptrToLabels, double ***ptrToMatrix
     return 1;
 }
 
+/**
+ * This function prints the co-occurrence matrix (C-matrix) to an output file.
+ * The output file will be a file called <output_file_name>_c_mat.txt where 
+ * <output_file_name> is the name of the output file specified by the user.
+ * This file will exist in the same location as the output file specified 
+ * by the user.
+ * Note: Each row/column of the matrix is represented by a "label." This label is the 
+ *          compressed vector the row/column corresponds to
+ * 
+ * @param sizeOfCMatrix: Number of rows/columns in the C-matrix
+ * @param ptrToLabels: Pointer to the array of strings that are the labels for the C-matrix
+ * @param ptrToMatrix: Pointer to the C-matrix
+ * @param output_file: The output file to write to
+ */
 int print_c_matrix_to_file(int sizeOfCMatrix, char ***ptrToLabels, double ***ptrToMatrix, FILE *output_file)
 {
     char **labels = *ptrToLabels;
@@ -291,6 +333,14 @@ int print_c_matrix_to_file(int sizeOfCMatrix, char ***ptrToLabels, double ***ptr
     return 1;
 }
 
+/**
+ * This function prints the C-matrix's labels to the console.
+ * Note: Each row/column of the matrix is represented by a "label." This label is the 
+ *          compressed vector the row/column corresponds to
+ * 
+ * @param sizeOfCMatrix: Number of rows/columns in the C-matrix
+ * @param ptrToLabels: Pointer to the array of strings that are the labels for the C-matrix
+ */
 int print_labels(int sizeOfCMatrix, char ***ptrToLabels)
 {
     char **labels = *ptrToLabels;
@@ -302,6 +352,20 @@ int print_labels(int sizeOfCMatrix, char ***ptrToLabels)
     return 1;
 }
 
+/**
+ * This function prints the Epsilon Lookup Table to the console. The table will be printed in 
+ * the form:
+ *              <group_leader's_compressed_vector> : <group_member's_compressed_vector>
+ * Note: Each row/column of the matrix is represented by a "label." This label is the 
+ *          compressed vector the row/column corresponds to
+ * Note: A luRow (lookup row) struct contains a compressed vector, the compressed vector 
+ *          it is statistically similar to (the group leader), and the matrix index 
+ *          corresponding to the group leader
+ * 
+ * @param ptrToLookupTable: The Epsilon Lookup Table represented as an array of luRow structs
+ * @param sizeOfCMatrix: Number of rows/columns in the C-matrix
+ * @param ptrToLabels: Pointer to the array of strings that are the labels for the C-matrix
+ */
 int print_e_lookup(struct luRow **ptrToLookupTable, int sizeOfCMatrix, char ***ptrToLabels)
 {
     struct luRow *lookupTable = *ptrToLookupTable;
