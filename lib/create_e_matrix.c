@@ -1,18 +1,15 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include "read_c_vectors.h"
-#include "create_e_matrix.h"
-
 /**
  * This file contains a function that creates the Epsilon Matrix (E-matrix). The E-matrix is 
  * created by referring back to the original input data and using the Epsilon Lookup Table to 
  * map each vector to a spot in the E-matrix. The E-matrix is written to an output file 
  * specified by the user.
- * 
- * 
- * 
  */
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include "read_c_vectors.h"
+#include "create_e_matrix.h"
 
 /**
  * This function creates the E-matrix and writes it to the output file specified by the user.
@@ -38,7 +35,7 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
     int i;
     int currentPos = -1;
     int nextPos = -1;
-
+    
     char vector[hist + 1];
     int cvec[dir];
     char cvecAsString[dir + 1];

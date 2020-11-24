@@ -1,17 +1,14 @@
+/**
+ * This file contains functions that can be used to create the co-occurrence matrix
+ * (C-matrix). The co-occurence matrix is produced by methodically compressing the 
+ * data read from the input file.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "read_c_vectors.h"
 #include "create_c_matrix.h"
-
-/**
- * This file contains functions that can be used to create the co-occurrence matrix
- * (C-matrix). The co-occurence matrix is produced by methodically compressing the 
- * data read from the input file.
- * 
- * 
- * 
- */
 
 /**
  * This function uses data read from the input file to create the C-matrix.

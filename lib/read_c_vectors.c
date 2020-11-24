@@ -1,13 +1,10 @@
+/**
+ * This file contains functions related to reading input data as vectors.
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include "read_c_vectors.h"
-
-/**
- * This file contains functions related to reading input data as vectors.
- * 
- * 
- * 
- */
 
 /**
  * This function reads a past and future vector from the input file and COMPRESSES them. 
@@ -104,8 +101,7 @@ int read_c_vectors(char *past, char *future,
  *
  * @return: -1 on failure; 1 on success
  */
-int read_uncompressed_vectors(char *vector,
-                              int len, FILE *file)
+int read_uncompressed_vectors(char *vector, int len, FILE *file)
 {
     fpos_t pos;
     if (fgetpos(file, &pos) == -1)

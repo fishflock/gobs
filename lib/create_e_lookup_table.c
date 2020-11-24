@@ -1,18 +1,16 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "create_e_lookup_table.h"
-
 /**
  * This file contains functions that can be used to create the Epsilon Lookup Table. 
  * This includes the functions that perform statistical comparison on rows and functionality 
  * related to the statistical analysis (i.e. converting the C-matrix to probabilities). 
  * The current stat tests implemented are chi-squared and g-test.
  * 
- * 
- * 
  */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include "create_e_lookup_table.h"
 
 // Estimate of Euler's number
 #define EULERS 2.71828
@@ -107,12 +105,10 @@ int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realS
                     total = 0;
                     if (STAT_METHOD == 1)
                     {
-                        //printf("Performing X squared test\n");
                         chi_squared_test(matrix[currentLead], matrix[i], realSize, &total);
                     }
                     if (STAT_METHOD == 2)
                     {
-                        //printf("Performing g test\n");
                         g_test(matrix[currentLead], matrix[i], realSize, &total);
                         //printf("Comparing %s to %s ---> Total: %f\n", labels[i], labels[currentLead], total);
                     }
