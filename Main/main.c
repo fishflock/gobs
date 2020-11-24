@@ -1,3 +1,17 @@
+/**
+ * This program was created and maintained by the 2020 Capstone 2 team, Fish Flock.
+ * This program was based on Geometry of Behavioral Spaces (GOBS) framework created by 
+ * Dr. Martin Cenek and can be used to analyze large sets of data collected from a moving 
+ * system. The GOBS framework produces a matrix that can be used to identify emergent 
+ * behaviors from the moving system in question.
+ * 
+ * This file contains the main entry point to the GOBS program.
+ * 
+ * @author: Tawny Motoyama, Cole Holbrook, Taylor Odem, and Kollin Raudsepp
+ * @version: 1.0.0
+ * 
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -13,20 +27,7 @@
 #include <unistd.h>
 #include <ctype.h>
 
-/**
- * This program was created and maintained by the 2020 Capstone 2 team, Fish Flock.
- * This program was based on Geometry of Behavioral Spaces (GOBS) framework created by 
- * Dr. Martin Cenek and can be used to analyze large sets of data collected from a moving 
- * system. The GOBS framework produces a matrix that can be used to identify emergent 
- * behaviors from the moving system in question.
- * 
- * This file contains the main entry point to the GOBS program.
- * 
- * @author: Tawny Motoyama, Cole Holbrook, Taylor Odem, and Kollin Raudsepp
- * @version: 1.0.0
- * 
-*/
-
+//Global variables
 int BUFF_SIZE = 128;
 int MAX_SIZE = 816;
 
@@ -53,7 +54,9 @@ int print_e_lookup(struct luRow **ptrToLookupTable, int realSize, char ***ptrToL
  */
 int main(int argc, char *argv[])
 {
-    //--------------- Verify input and output files ---------------
+    //------------------------- Start of Parameter checks ----------------------------------------
+    
+    //Verify input and output files
     FILE *input, *output, *cMatOutput;
     char *input_file = (char *)malloc(BUFF_SIZE);
     char *output_file = (char *)malloc(BUFF_SIZE);
@@ -72,7 +75,7 @@ int main(int argc, char *argv[])
     }
     strcat(output_file_c_mat, "_c_mat.txt");
 
-    //Check it input is .csv
+    //Check if input is .csv
     if (strcmp(&input_file[strlen(input_file) - 4], ".csv") == 0)
     {
         printf("Importing data from %s...\n", input_file);
@@ -82,6 +85,7 @@ int main(int argc, char *argv[])
         printf("%s is an invalid file. Input must be a .csv file. Exiting program...\n", input_file);
         exit(1);
     }
+
     //Check if output is .txt
     if (strcmp(&output_file[strlen(output_file) - 4], ".txt") != 0)
     {
@@ -93,6 +97,7 @@ int main(int argc, char *argv[])
         output = fopen(output_file, "w");
         cMatOutput = fopen(output_file_c_mat, "w");
     }
+
     //Check that input does exist
     if ((input = fopen(input_file, "r")) == NULL)
     {
@@ -100,7 +105,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    //--------- Check normalize and reduceNoiseFlag parameters ---------
+    //Check normalize flag and Alpha Value 
     if (argv[3] != NULL)
     {
         NORMALIZE_FLAG = atoi(argv[3]);
@@ -111,6 +116,8 @@ int main(int argc, char *argv[])
         ALPHA = atof(argv[4]);
         printf("Setting ALPHA to: %f\n", ALPHA);
     }
+
+    //Check vector history length and number of trajectories
     if (argv[5] != NULL)
     {
         VEC_HIST_LEN = atoi(argv[5]);
@@ -122,6 +129,7 @@ int main(int argc, char *argv[])
         printf("Setting NUM_DIRECTIONS to: %d\n", NUM_DIRECTIONS);
     }
 
+    //Check statistical comparison method
     if (argv[7] != NULL)
     {
         STAT_METHOD = atoi(argv[7]);
@@ -136,18 +144,19 @@ int main(int argc, char *argv[])
         }
     }
 
-    //-------------------------------------------------------------------
-
+    //------------------------- End of Parameter checks ----------------------------------------
+    
+    //Create a string initialized to X zeros; where X is the number of directions specified
+    //(Set the last character to the string terminator character)
     int i;
-    // Create a string initialized to X zeros; where X is the number of directions specified
-    // (Set the last character to the string terminator character)
     char initializeToZeros[NUM_DIRECTIONS + 1];
     for (i = 0; i < NUM_DIRECTIONS; i++)
     {
         initializeToZeros[i] = '0';
     }
     initializeToZeros[NUM_DIRECTIONS] = '\0';
-    // INITIALIZE LABELS AS A 2D CHAR ARRAY WITH DIMENSIONS: MAX_SIZE*(NUM_DIRECTIONS + 1)
+
+    //Initialize labels as a 2D char array with dimensions: MAX_SIZE*(NUM_DIRECTIONS + 1)
     char **labels = NULL;
     labels = (char **)malloc(sizeof(char *) * MAX_SIZE);
     for (i = 0; i < MAX_SIZE; i++)
@@ -156,7 +165,7 @@ int main(int argc, char *argv[])
         strcpy(labels[i], initializeToZeros);
     }
 
-    // INITIALIZE MATRIX AS A 2D INT ARRAY WITH DIMENSIONS: MAX_SIZE*MAX_SIZE
+    //Initialize matrix as a 2D int array with dimensions: MAX_SIZE*MAX_SIZE
     double **matrix = NULL;
     matrix = (double **)malloc(sizeof(double *) * MAX_SIZE);
     for (i = 0; i < MAX_SIZE; i++)
@@ -177,11 +186,14 @@ int main(int argc, char *argv[])
 
     int printCMat = print_c_matrix_to_file(sizeOfCMatrix, &labels, &matrix, cMatOutput);
 
+    //If in debug mode, print out helpful information.
     if (debug)
     {
         int printCMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
         int printLabels = print_labels(sizeOfCMatrix, &labels);
     }
+
+    //If normalize flag is on, perform normalization of the c matrix
     if (NORMALIZE_FLAG)
     {
         int normalize = normalize_c_matrix(sizeOfCMatrix, &matrix, numVecsRecorded, VEC_HIST_LEN);
@@ -193,7 +205,6 @@ int main(int argc, char *argv[])
 
     // Create the epsilon lookup table
     struct luRow *lookupTable = (struct luRow *)malloc(sizeof(struct luRow) * MAX_SIZE);
-
     for (i = 0; i < MAX_SIZE; i++)
     {
         lookupTable[i].epsilon = (char *)malloc(sizeof(char) * (NUM_DIRECTIONS + 1));
@@ -208,7 +219,7 @@ int main(int argc, char *argv[])
         int printEMat = print_e_lookup(&lookupTable, sizeOfCMatrix, &labels);
     }
 
-    // INITIALIZE MATRIX AS A 2D INT ARRAY WITH DIMENSIONS: sizeOfEMatrix*sizeOfEMatrix
+    // Initialize matrix as a 2D int array with dimensions: sizeOfEMatrix*sizeOfEMatrix
     int **eMat = NULL;
     eMat = (int **)malloc(sizeof(int *) * sizeOfEMatrix);
 
@@ -227,6 +238,7 @@ int main(int argc, char *argv[])
     fclose(input);
     fclose(output);
 
+    //------------- Free malloced memory ----------------
     if (labels != NULL)
     {
         for (i = 0; i < MAX_SIZE; i++)
@@ -259,10 +271,10 @@ int main(int argc, char *argv[])
     }
 }
 
+
 //##################################################################################
+//################## HELPER METHODS FOR PRINTING TO TERMINAL #######################
 //##################################################################################
-//##################################################################################
-// HELPER METHODS FOR PRINTING TO TERMINAL
 
 /**
  * This function prints the co-occurrence matrix (C-matrix) to the console.
