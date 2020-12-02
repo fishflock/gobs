@@ -45,6 +45,16 @@ Vector History: 5
 Trajectory Count: 4
 Statistical Comparison: G-Test
 
+Real: 59m28.497s
+User: 56m28.090s
+sys: 3m0.140s
+Input File: Data.csv
+Normalization Flag: 1
+Alpha: .01
+Vector History: 10
+Trajectory Count: 4
+Statistical Comparison: X Squared
+
 Real: 71m10.857s
 User: 68m13.776s
 sys: 2m56.565s
@@ -55,12 +65,23 @@ Vector History: 10
 Trajectory Count: 4
 Statistical Comparison: G-Test
 
-Real: 59m28.497s
-User: 56m28.090s
-sys: 3m0.140s
-Input File: Data.csv
+### 10 GB File
+Real: 243m8.026s
+User: 217m14.912s
+sys: 25m52.138s
+Input File: 10 GB file with circling behavior
 Normalization Flag: 1
 Alpha: .01
 Vector History: 10
 Trajectory Count: 4
 Statistical Comparison: X Squared
+
+Real: m.s
+User: m.s
+sys: m.s
+Input File: 10 GB file with circling behavior
+Normalization Flag: 1
+Alpha: .01
+Vector History: 10
+Trajectory Count: 4
+Statistical Comparison: G-Test
