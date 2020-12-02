@@ -76,9 +76,9 @@ Vector History: 10
 Trajectory Count: 4
 Statistical Comparison: X Squared
 
-Real: m.s
-User: m.s
-sys: m.s
+Real: 254m33.726s
+User: 228m8.138s
+sys: 26m24.618s
 Input File: 10 GB file with circling behavior
 Normalization Flag: 1
 Alpha: .01
