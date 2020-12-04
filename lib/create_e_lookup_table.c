@@ -106,12 +106,12 @@ int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realS
                     if (STAT_METHOD == 1)
                     {
                         chi_squared_test(matrix[currentLead], matrix[i], realSize, &total);
-                        printf("Comparing %s to %s ---> Total: %f\n", labels[i], labels[currentLead], total);
+                        //printf("Comparing %s to %s ---> Total: %f\n", labels[i], labels[currentLead], total);
                     }
                     if (STAT_METHOD == 2)
                     {
                         g_test(matrix[currentLead], matrix[i], realSize, &total);
-                        printf("Comparing %s to %s ---> Total: %f\n", labels[i], labels[currentLead], total);
+                        //printf("Comparing %s to %s ---> Total: %f\n", labels[i], labels[currentLead], total);
                     }
 
                     if (total < ALPHA)
