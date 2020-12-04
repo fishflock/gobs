@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
 
     if (debug)
     {
-        int printCMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
+        //int printCMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
         int printLabels = print_labels(sizeOfCMatrix, &labels);
     }
     if (NORMALIZE_FLAG)
