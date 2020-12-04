@@ -13,7 +13,7 @@ To run the program, run the "make" command from the gobs directory. Then run ./g
    1 for X Squared test
    2 for G-Test
 
-Example run command: "./gobs Main/input/basic.csv output.txt 1 1 .1 4 1"
+Example run command: "./gobs Main/input/basic.csv output.txt 1 .001 5 5 1"
 
 
 ### NetLogo Data Generation
@@ -41,3 +41,20 @@ Run 'extract.py' either in cmd or IDLE with the following arguments:
 6. Scale Multiplier (float between 0 and 1)
 
 Example run command: 'python extract.py input.txt output.txt weight blondel spring 0.5'
+
+### Navigating GOBS Codebase
+The main c file is located inside of the Main folder.  
+  
+The helper functions that carry out much of the algorithm are located in the lib/ directory.  
+
+These files consist of:  
+- create_c_matrix: function to create c matrix, function to normalize c matrix values  
+- create_e_lookup-table: function to create e table, function to fill e table, G-test function, X Squared function, X Squared Percent Point Function, function to convert matrix values into probabilities based on input size  
+- create_e_matrix: function to create the e matrix
+- read_c_vectors: function to read in vectors and compress them, function to read uncompressed vectors
+
+
+## Note
+
+Find testing info in file testingDoc.txt  
+Find input files in Main/input/ and output in Main/output/
