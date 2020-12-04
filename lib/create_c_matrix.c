@@ -39,45 +39,58 @@ int create_c_matrix(int dir, int hist,
     int last_label_pos = 0;
     int i;
     *numVecsRecorded = 0;
+
+    //Read the input file one past and future vector at a time (until the end of file)
     while (read_c_vectors(past, future, hist, dir, file) != -1)
     {
+        //See if the current past vector already exists as a row in the C matrix.
         int past_pos = -1;
         for (int i = 0; i < last_label_pos + 1; i++)
         {
             if (strcmp(past, labels[i]) == 0)
             {
-                //printf("Found a PAST match\n");
+                //The past vector already exists as a row in the matrix.
+                // Set past vector's position to the corresponding index
                 past_pos = i;
             }
         }
         if (past_pos == -1)
         {
-            //printf("Couldn't find a PAST match. Adding a new label!\n");
+            //The past vector does NOT exist in the matrix.
+            // Add it as a row in the matrix
             strcpy(labels[last_label_pos], past);
             past_pos = last_label_pos;
             last_label_pos++;
         }
 
+        //See if the current future vector already exists as a row in the C matrix.
         int future_pos = -1;
         for (int i = 0; i < last_label_pos + 1; i++)
         {
             if (strcmp(future, labels[i]) == 0)
             {
-                //printf("Found a FUTURE match\n");
+                //The future vector already exists as a row in the matrix.
+                // Set future vector's position to the corresponding index
                 future_pos = i;
             }
         }
         if (future_pos == -1)
         {
-            //printf("Couldn't find a FUTURE match. Adding a new label!\n");
+            //The future vector does NOT exist in the matrix.
+            // Add it as a row in the matrix
             strcpy(labels[last_label_pos], future);
             future_pos = last_label_pos;
             last_label_pos++;
         }
 
+        //Increment the position in the matrix that corresponds to the
+        // past and future indices
         matrix[past_pos][future_pos]++;
+
+        //Keep track of the number of vectors recorded for later use
         *numVecsRecorded = *numVecsRecorded + 1;
     }
+
     printf("\n\n NUMBER OF VECTORS RECORDED: %d\n", *numVecsRecorded);
     fseek(file, 0, SEEK_SET);
     return last_label_pos;
@@ -95,9 +108,12 @@ int create_c_matrix(int dir, int hist,
  */
 int normalize_c_matrix(int realSize, double ***ptrToMatrix, int numVecsRecorded, int historyLength)
 {
+    //Find the value to normalize the matrix by
     int denominator = numVecsRecorded - 2 * historyLength;
     printf("Normalizing C matrix by a factor of: %d\n", denominator);
     double **matrix = *ptrToMatrix;
+
+    //Loop through and divide each matrix value by the denominator found above
     int i, j;
     int matrixSum = 0;
     for (i = 0; i < realSize; i++)
