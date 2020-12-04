@@ -106,11 +106,12 @@ int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realS
                     if (STAT_METHOD == 1)
                     {
                         chi_squared_test(matrix[currentLead], matrix[i], realSize, &total);
+                        printf("Comparing %s to %s ---> Total: %f\n", labels[i], labels[currentLead], total);
                     }
                     if (STAT_METHOD == 2)
                     {
                         g_test(matrix[currentLead], matrix[i], realSize, &total);
-                        //printf("Comparing %s to %s ---> Total: %f\n", labels[i], labels[currentLead], total);
+                        printf("Comparing %s to %s ---> Total: %f\n", labels[i], labels[currentLead], total);
                     }
 
                     if (total < ALPHA)
@@ -132,6 +133,21 @@ int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realS
                     }
                 }
             }
+        }
+    }
+
+    for (i = 0; i < realSize; i++)
+    {
+        if (flags[i] == 0)
+        {
+            epsilonIdx++;
+            flags[i] = 1;
+            // Add the LEADER'S label to the epsilon table
+            strcpy(lookupTable[lastEl].epsilon, labels[i]);
+            // Add the follower's vector to the epsilon table
+            strcpy(lookupTable[lastEl].vector, labels[i]);
+            lookupTable[lastEl].epsilonIdx = epsilonIdx;
+            lastEl++;
         }
     }
 
