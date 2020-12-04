@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
     //If in debug mode, print out helpful information.
     if (debug)
     {
-        int printCMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
+        //int printCMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
         int printLabels = print_labels(sizeOfCMatrix, &labels);
     }
 
