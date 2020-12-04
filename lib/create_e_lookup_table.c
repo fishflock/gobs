@@ -56,6 +56,9 @@ int create_e_table(struct luRow **ptrToLookupTable, int dir, int realSize, doubl
     // Add the corresponding vector of first row to the epsilon table
     strcpy(lookupTable[0].vector, labels[0]);
 
+    // At this point, space for the table has been allocated and the table
+    //  contains a single entry for the first compressed vector read in.
+    //  Now use the call below to fill the rest of the table
     int fillTab = fill_e_table(flags, &lookupTable, dir, realSize, &matrix, &labels, ALPHA, STAT_METHOD);
     return fillTab;
 }
@@ -94,41 +97,48 @@ int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realS
     // Loop through every row in matrix
     for (currentLead = 0; currentLead < realSize; currentLead++)
     {
-        //printf("...labels[currentLead]: %s\n", labels[currentLead]);
-        // IF it hasn't been flagged yet, compare it to all the others
+        // IF it's the first row or the current row  hasn't been flagged yet,
+        //  compare it to all the other rows
         if ((currentLead == 0) || (flags[currentLead] == 0))
         {
+            // Compare the current lead against every other non-flagged row
             for (i = 1; i < realSize; i++)
             {
                 if (flags[i] == 0)
                 {
                     total = 0;
+
+                    //Run the correct stat test based on user specified parameter
                     if (STAT_METHOD == 1)
                     {
                         chi_squared_test(matrix[currentLead], matrix[i], realSize, &total);
-                        //printf("Comparing %s to %s ---> Total: %f\n", labels[i], labels[currentLead], total);
                     }
                     if (STAT_METHOD == 2)
                     {
                         g_test(matrix[currentLead], matrix[i], realSize, &total);
-                        //printf("Comparing %s to %s ---> Total: %f\n", labels[i], labels[currentLead], total);
                     }
 
+                    //If the current row is found to be similar to the current lead
+                    // do the inside of this if statement
                     if (total < ALPHA)
                     {
+                        //Keep track of the number of unique group leads for easier
+                        // matrix indexing (when creating the e matrix)
                         if (strcmp(lookupTable[lastEl - 1].epsilon, labels[currentLead]) != 0)
                         {
                             epsilonIdx++;
                         }
 
-                        //printf("       Adding %s to the %s group.\n", labels[i], labels[currentLead]);
                         // Flag this row!
                         flags[i] = 1;
                         // Add the LEADER'S label to the epsilon table
                         strcpy(lookupTable[lastEl].epsilon, labels[currentLead]);
                         // Add the follower's vector to the epsilon table
                         strcpy(lookupTable[lastEl].vector, labels[i]);
+                        // Set the epsilon index to the index corresponding to the group lead
                         lookupTable[lastEl].epsilonIdx = epsilonIdx;
+                        // Keep track of the size of the lookup table (all entries, not just
+                        //  the number of unique group leads)
                         lastEl++;
                     }
                 }
@@ -136,21 +146,29 @@ int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realS
         }
     }
 
+    //After completing the long process above^, if there are still rows that have
+    // not been flagged, add them as their own individual entry in the lookup table
     for (i = 0; i < realSize; i++)
     {
         if (flags[i] == 0)
         {
+            // Update the epsilon index to keep track of the row's index in the e-matrix
             epsilonIdx++;
+            // Flag this row
             flags[i] = 1;
             // Add the LEADER'S label to the epsilon table
             strcpy(lookupTable[lastEl].epsilon, labels[i]);
             // Add the follower's vector to the epsilon table
             strcpy(lookupTable[lastEl].vector, labels[i]);
+            // Set the epsilon index to the index corresponding to the group lead
             lookupTable[lastEl].epsilonIdx = epsilonIdx;
+            // Keep track of the size of the lookup table (all entries, not just
+            //  the number of unique group leads)
             lastEl++;
         }
     }
 
+    //Find the total number of unique group leads in the lookup table
     int uniqueEls = 0;
     for (i = 0; i < lastEl; i++)
     {
@@ -177,6 +195,8 @@ int fill_e_table(int *flags, struct luRow **ptrToLookupTable, int dir, int realS
 int g_test(double *leadRow, double *otherRow, int realSize, double *total)
 {
     double currentTotal = 0.0;
+
+    //Compute the g-test p-value between the current group lead and the current vector
     for (int k = 0; k < realSize; k++)
     {
         if (leadRow[k] > 0.0)
@@ -186,11 +206,9 @@ int g_test(double *leadRow, double *otherRow, int realSize, double *total)
                 currentTotal += otherRow[k] * (log(otherRow[k] / leadRow[k]));
             }
         }
-        //printf("%f : ", currentTotal);
     }
-
     *total = 2 * currentTotal;
-    //printf("\nG-Test val: %f\n", *total);
+
     return 1;
 }
 
@@ -209,6 +227,7 @@ int chi_squared_test(double *row1, double *row2, int realSize, double *total)
     double sum1 = 0;
     double sum2 = 0;
 
+    //Find the degree of freedom
     int degreeOfFreedom = 0;
     for (int i = 0; i < realSize; i++)
     {
@@ -220,6 +239,7 @@ int chi_squared_test(double *row1, double *row2, int realSize, double *total)
         }
     }
 
+    //Compute preliminary values for the chi-squared calculation
     double k1 = 0;
     if (sum1 != 0)
     {
@@ -231,6 +251,7 @@ int chi_squared_test(double *row1, double *row2, int realSize, double *total)
         k2 = sqrt(sum1 / sum2);
     }
 
+    //Perform the summation calculations for the chi-squared value
     for (int k = 0; k < realSize; k++)
     {
         double denominator = row1[k] + row2[k];
@@ -242,13 +263,13 @@ int chi_squared_test(double *row1, double *row2, int realSize, double *total)
         }
     }
 
+    //Adjust the chi-squared value to work with an alpha between 0 and 1
+    // (this is done using the chi-squared percent point function)
     double adjustedChiSquared = 0.0;
     if (*total > 0.0)
     {
         adjustedChiSquared = chsppf(*total, degreeOfFreedom);
     }
-
-    //printf("adjusted chi-squared : %f\n", adjustedChiSquared);
     *total = adjustedChiSquared;
 
     return 1;
@@ -266,22 +287,23 @@ int chi_squared_test(double *row1, double *row2, int realSize, double *total)
  */
 double chsppf(double chiSquaredVal, int degreeOfFreedom)
 {
+    //Compute preliminary values for the chi-squared percent point function calculation
     double eulersVal = pow(EULERS, (0 - chiSquaredVal) / 2);
     double xVal = pow(chiSquaredVal, (degreeOfFreedom / 2) - 1);
     double numerator = eulersVal * xVal;
-
     int x = (degreeOfFreedom / 2) - 1;
+
+    //Calculate the gamma value
     double gammaVal = 1;
     for (int i = 1; i <= x; i++)
     {
         gammaVal = gammaVal * i;
     }
 
+    //Final calculations
     double twosVal = pow(2.0, (degreeOfFreedom / 2));
     double denominator = twosVal * gammaVal;
-
     double alpha = numerator / denominator;
-    //printf("numerator: %.0000f // denominator: %.0000f\n", numerator, denominator);
     return alpha;
 }
 
@@ -295,6 +317,8 @@ double chsppf(double chiSquaredVal, int degreeOfFreedom)
 int convert_to_probabilities(int realSize, double ***ptrToMatrix)
 {
     double **matrix = *ptrToMatrix;
+
+    //Loop through the matrix and fine the sum of all values
     int i, j;
     double matrixSum = 0;
     for (i = 0; i < realSize; i++)
@@ -304,8 +328,9 @@ int convert_to_probabilities(int realSize, double ***ptrToMatrix)
             matrixSum += matrix[i][j];
         }
     }
-
     printf("Matrix Sum = %f\n", matrixSum);
+
+    //Divide each matrix value by the sum
     for (i = 0; i < realSize; i++)
     {
         for (j = 0; j < realSize; j++)

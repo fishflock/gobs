@@ -69,10 +69,12 @@ int read_c_vectors(char *past, char *future,
         }
     }
 
+    //Save past vector as a string
     for (i = 0; i < dir; i++)
         past[i] = pastAsInts[i] + '0';
     past[dir] = '\0';
 
+    //Save future vector as a string
     for (int j = 0; j < dir; j++)
         future[j] = futureAsInts[j] + '0';
     future[dir] = '\0';
@@ -115,6 +117,7 @@ int read_uncompressed_vectors(char *vector, int len, FILE *file)
         vec[i] = 0;
     }
 
+    // Read in a vector of the correct length (user specified param)
     int val;
     for (i = 0; i < len; i++)
     {
@@ -124,6 +127,7 @@ int read_uncompressed_vectors(char *vector, int len, FILE *file)
             return -1;
     }
 
+    //Save vector as a string
     for (i = 0; i < len; i++)
         vector[i] = vec[i] + '0';
     vector[len] = '\0';

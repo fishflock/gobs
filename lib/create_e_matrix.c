@@ -33,34 +33,48 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
     int **eMat = *ptrToEMat;
 
     int i;
+
+    // E-matrix row index that the current vector corresponds to
     int currentPos = -1;
+    // E-matrix column index that the next vector corresponds to
     int nextPos = -1;
-    
+
+    // Placeholder for a vector read in (uncompressed)
     char vector[hist + 1];
+    // The placeholder vector compressed
     int cvec[dir];
+    // The placeholder vector as a string
     char cvecAsString[dir + 1];
+
+    // Current compressed vector as a string
     char current[dir + 1];
+    // Next compressed vector as a string
     char next[dir + 1];
+
     int errorFlag = 0;
 
+    //Read a single (uncompressed) vector
     read_uncompressed_vectors(vector, hist, input_file);
-
+    //Initialize the compressed palceholder to all zeros
     for (i = 0; i < dir; i++)
     {
         cvec[i] = 0;
     }
-    // Get compressed vec
+    //Compress the vector
     for (i = 0; i < hist; i++)
     {
         int val = vector[i] - '0';
         cvec[val - 1] += 1;
     }
+    //Set current vector to the vector just read in
     for (i = 0; i < dir; i++)
         current[i] = cvec[i] + '0';
     current[dir] = '\0';
 
+    //Read all vectors from the input file
     while (read_uncompressed_vectors(vector, hist, input_file) != -1)
     {
+        //Initialize the compressed palceholder to all zeros
         for (i = 0; i < dir; i++)
         {
             cvec[i] = 0;
@@ -71,10 +85,13 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
             int val = vector[i] - '0';
             cvec[val - 1] += 1;
         }
+        //Set next vector to the vector just read in
         for (i = 0; i < dir; i++)
             next[i] = cvec[i] + '0';
         next[dir] = '\0';
 
+        //Use the lookup table to find the index that corresponds to
+        // the current vector (row index)
         for (i = 0; i < sizeofLookupTable; i++)
         {
             if (strcmp(current, lookupTable[i].vector) == 0)
@@ -83,7 +100,8 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
                 break;
             }
         }
-        // For each entry in the lookup table
+        //Use the lookup table to find the index that corresponds to
+        // the next vector (column index)
         for (int j = 0; j < sizeofLookupTable; j++)
         {
             if (strcmp(next, lookupTable[j].vector) == 0)
@@ -93,6 +111,7 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
             }
         }
 
+        //Increment the correct spot in the e-matrix (using indices just found)
         if ((currentPos != -1) && (nextPos != -1))
         {
             eMat[currentPos][nextPos]++;
@@ -104,6 +123,8 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
             errorFlag = 1;
         }
 
+        //Reset the current and next matrix positions to -1
+        // (so that you can tell if a matrix cell is not found)
         currentPos = -1;
         nextPos = -1;
         strcpy(current, next);
@@ -132,6 +153,7 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
     int row, col, top;
     fprintf(output_file, "Epsilon matrix:\n");
     fprintf(output_file, "            ");
+    //Write the column labels at the top of the matrix
     for (top = 0; top < numRows; top++)
     {
         fprintf(output_file, "%12s", uniqueLabels[top]);
@@ -141,6 +163,8 @@ int create_e_matrix(struct luRow **ptrToLookupTable, int sizeofLookupTable, int 
         }
     }
 
+    //Write each row label followed by the corresponding matrix values for that row
+    // until the entire matrix is written to the output file
     for (row = 0; row < numRows; row++)
     {
         fprintf(output_file, "%12s", uniqueLabels[row]);

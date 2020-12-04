@@ -55,7 +55,7 @@ int print_e_lookup(struct luRow **ptrToLookupTable, int realSize, char ***ptrToL
 int main(int argc, char *argv[])
 {
     //------------------------- Start of Parameter checks ----------------------------------------
-    
+
     //Verify input and output files
     FILE *input, *output, *cMatOutput;
     char *input_file = (char *)malloc(BUFF_SIZE);
@@ -64,6 +64,7 @@ int main(int argc, char *argv[])
     input_file = argv[1];
     output_file = argv[2];
 
+    //Set the C Matrix output file name (based on the user specified regular output file)
     int extensionIdx = strlen(argv[2]) - 4;
     for (int i = 0; i < strlen(argv[2]); i++)
     {
@@ -105,7 +106,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    //Check normalize flag and Alpha Value 
+    //Check normalize flag and Alpha Value
     if (argv[3] != NULL)
     {
         NORMALIZE_FLAG = atoi(argv[3]);
@@ -145,7 +146,7 @@ int main(int argc, char *argv[])
     }
 
     //------------------------- End of Parameter checks ----------------------------------------
-    
+
     //Create a string initialized to X zeros; where X is the number of directions specified
     //(Set the last character to the string terminator character)
     int i;
@@ -178,12 +179,13 @@ int main(int argc, char *argv[])
             matrix[i][j] = 0;
     }
 
-    // Create c matrix
+    // Create C matrix
     int numVecsRecorded;
     int sizeOfCMatrix = create_c_matrix(NUM_DIRECTIONS, VEC_HIST_LEN, &labels, &matrix, input, &numVecsRecorded);
     printf("C matrix is %dx%d\n", sizeOfCMatrix, sizeOfCMatrix);
     printf("Number of unqiue vectors (size of labels array) %d\n", sizeOfCMatrix);
 
+    // Print C matrix
     int printCMat = print_c_matrix_to_file(sizeOfCMatrix, &labels, &matrix, cMatOutput);
 
     //If in debug mode, print out helpful information.
@@ -201,6 +203,7 @@ int main(int argc, char *argv[])
         int normalizedMat = print_c_matrix(sizeOfCMatrix, &labels, &matrix);
     }
 
+    //Convert C Matrix values to probabilities to prepare for stats tests
     int probs = convert_to_probabilities(sizeOfCMatrix, &matrix);
 
     // Create the epsilon lookup table
@@ -233,6 +236,7 @@ int main(int argc, char *argv[])
             eMat[i][j] = 0;
     }
 
+    //Create E Matrix with the lookup table generated and the original input data
     int done = create_e_matrix(&lookupTable, sizeOfCMatrix, sizeOfEMatrix, &eMat, input, output, NUM_DIRECTIONS, VEC_HIST_LEN);
 
     fclose(input);
@@ -271,7 +275,6 @@ int main(int argc, char *argv[])
     }
 }
 
-
 //##################################################################################
 //################## HELPER METHODS FOR PRINTING TO TERMINAL #######################
 //##################################################################################
@@ -290,9 +293,14 @@ int print_c_matrix(int sizeOfCMatrix, char ***ptrToLabels, double ***ptrToMatrix
     char **labels = *ptrToLabels;
     double **matrix = *ptrToMatrix;
     printf("Co-occurrence Matrix: \n");
+
+    //Print C matrix row by row
     for (int i = 0; i < sizeOfCMatrix; i++)
     {
+        //Print label for the current row
         printf("%s ", labels[i]);
+
+        //Print the values that correspond to the current row
         for (int j = 0; j < sizeOfCMatrix; j++)
             printf("%.0f ", matrix[i][j]);
         printf("\n");
@@ -321,6 +329,8 @@ int print_c_matrix_to_file(int sizeOfCMatrix, char ***ptrToLabels, double ***ptr
     int row, col, top;
     fprintf(output_file, "Co-occurrence Matrix: \n");
     fprintf(output_file, "            ");
+
+    //Write all column labels for the C Matrix to the C Matrix output file
     for (top = 0; top < sizeOfCMatrix; top++)
     {
         fprintf(output_file, "%12s", labels[top]);
@@ -330,6 +340,7 @@ int print_c_matrix_to_file(int sizeOfCMatrix, char ***ptrToLabels, double ***ptr
         }
     }
 
+    //Write the C Matrix row by row (label followed by corresponding values)
     for (row = 0; row < sizeOfCMatrix; row++)
     {
         fprintf(output_file, "%12s", labels[row]);
@@ -357,6 +368,8 @@ int print_labels(int sizeOfCMatrix, char ***ptrToLabels)
 {
     char **labels = *ptrToLabels;
     printf("\n\nLabels:\n");
+
+    //Print each compressed vector found with its corresponding C Matrix row number
     for (int i = 0; i < sizeOfCMatrix; i++)
     {
         printf("%d: %s\n", i, labels[i]);
@@ -383,6 +396,9 @@ int print_e_lookup(struct luRow **ptrToLookupTable, int sizeOfCMatrix, char ***p
     struct luRow *lookupTable = *ptrToLookupTable;
     char **labels = *ptrToLabels;
     printf("\n\nEpsilon Lookup Table: \n");
+
+    //Print the lookup table as the epsilon compressed vector (group leader)
+    // followed by the current compressed vector
     for (int i = 0; i < sizeOfCMatrix; i++)
     {
         if (isdigit(lookupTable[i].epsilon[1]))
